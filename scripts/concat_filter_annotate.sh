@@ -88,13 +88,16 @@ java -Xmx9g -jar "${snpeff}" -c "${snpeff_config}" "${snpeff_db}" \
 "${bcftools_out}" >  "${annotate_vcf}"
 
 # Subset to biallelic SNPs, output tab-delimited genotype file.
+module unload bcftools
+module load bcftools/1.9
+
 bcftools view -m2 -M2 -v "${annotate_vcf}" \
     | bcftools view -e 'GT="mis"' \
     | bcftools query -H -f '%CHROM\t%POS[\t%GT]\n' >> "${genotype_table}"
 
 sed -i '1s/\[[0-9]\+\]//g' "${genotype_table}"
 sed -i '1s/\:GT//g' "${genotype_table}"
-sed -i '1s/\^# //' "${genotype_table}"
+sed -i '1s/^\# //' "${genotype_table}"
 
 # Zip and index output.
 bgzip "${annotate_vcf}"

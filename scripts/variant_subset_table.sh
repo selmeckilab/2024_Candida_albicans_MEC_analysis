@@ -12,14 +12,16 @@
 set -ue
 set -o pipefail
 
-out_file=Calbicans_MEC_bwa_filtered_annotated_amr
+out_file=Calbicans_MEC_bwa_filtered_annotated
 
 # load modules, use local for newer bcftools
 module use /home/selmecki/shared/software/modulefiles.local
 
 module load bcftools/1.17
+module load htslib/1.9
 module load gatk/4.1.2
 
+export BCFTOOLS_PLUGINS=/home/selmecki/shared/software/software.install/bcftools/1.17/plugins
 
 # remove int files
 function finish {
