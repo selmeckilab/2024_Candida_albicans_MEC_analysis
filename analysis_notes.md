@@ -1,5 +1,15 @@
 # MEC Candidemia Study *C. albicans* analysis
 
+### 2024-05-19
+#### Expanded data set - Ropars, Hirakawa, MEC
+Ran RAxML on 299 samples with 1000 bootstraps and no missing genotypes. See
+phylogeny.sh.
+
+### 2024-05-07
+#### Expanded data set
+Ran RAxML on 307 samples with 100 bootstraps and default vcf2phylip params (min
+4 samples per site).
+
 ### 2024-04-30
 #### Expanded data set - Davis lab env samples
 Haplotype caller workflow (initial var calls and genomicsdb update).
