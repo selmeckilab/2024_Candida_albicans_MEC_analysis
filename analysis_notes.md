@@ -1,18 +1,42 @@
 # MEC Candidemia Study *C. albicans* analysis
 
+### 2024-06-28-24
+#### Global alignment of MEC fastq files to A21 ref
+Finalizing CNV data for dissertation chapter and reviewing potential gene
+deletions. Aligned reads to ref using bbmap to see how much soft clipping by
+bwa is affecting results for some poorly-aligning regions. See
+array_bbduk_bbmap.sh. 
+
+### 2024-06-28
+#### MTL locus checks
+Aligned isolates with potential MTL homozygosity based on coverage depth (not
+equal to 1) to A22 ref genome to see alignments at a and alpha. See bam files in 
+align_variants_SC5314_A21_ref/A22_ref_bam/.
+
+### 2024-06-27
+#### CNV breakpoint analysis
+Searched for small-scale breakpoints based on 500-bp sliding windows using
+samtools mpileup files from genome plotting and subsetting to intersect genes
+found in A21 gff. Visually inspected potential deletions and amplifications in
+IGV. Calculated CNV distance to nearest repeat region using the A21 repeat GFF
+created by Travis Stratton (made a copy of the GFF and subset to remove
+duplicates). See cnv_repeat_proximit.sh.
+
 ### 2024-05-19
 #### Expanded data set - Ropars, Hirakawa, MEC
-Ran RAxML on 299 samples with 1000 bootstraps and no missing genotypes. See
-phylogeny.sh.
+Ran RAxML on 299 samples with 1000 bootstraps and no missing genotypes using
+filtered freebayes VCF (to keep topology most similar to the MEC tree built
+using freebayes).
 
 ### 2024-05-07
 #### Expanded data set
 Ran RAxML on 307 samples with 100 bootstraps and default vcf2phylip params (min
-4 samples per site).
+4 samples per site) using filtered haplotype_caller VCF.
 
 ### 2024-04-30
 #### Expanded data set - Davis lab env samples
-Haplotype caller workflow (initial var calls and genomicsdb update).
+Haplotype caller workflow (initial var calls and genomicsdb update). See
+scripts/haplotype_caller_scripts.
 
 ### 2024-04-26
 #### Expanded data set - Davis lab env samples
