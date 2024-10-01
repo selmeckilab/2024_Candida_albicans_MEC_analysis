@@ -4,12 +4,12 @@
 There are 100 *C. albicans* MEC isolates analyzed for this project (see
 "Calbicans_sequencing_paths.txt" for list of isolate IDs). All MEC isolates are
 single colony subcultures from blood cultures collected from UMN hospitals
-between  2019 and 2021. These were collected under IRB ID STUDY00006473.
+between 2019 and 2021. These were collected under IRB ID STUDY00006473.
 
 ## Metadata
 Clinical metadata is available in a Box spreadsheet and the UMN data shelter
 for study members. De-identified isolate data is available in a Selmecki lab
-REDCap  database (Selmecki Candida Isolate Data).
+REDCap database (Selmecki Candida Isolate Data).
 
 ## DNA extraction and Sequencing
 DNA extraction was performed with the standard Selmecki lab phenol protocol
@@ -23,8 +23,8 @@ to 111x.
 ## Sequencing reads
 All fastq files are uploaded to MSI (see "Calbicans_sequencing_paths.txt" for
 file locations). All files have been submitted to SRA (NCBI BioProject
-PRJNA1068683). See the REDCap database or NCBI submission portal for biosample
-and SRA accession numbers.
+PRJNA1068683). See the "Selmecki Candida Isolate Data" REDCap database or NCBI 
+submission portal for biosample and SRA accession numbers.
 
 ## Trimming, alignment, QC
 Samples were trimmed with BBDuk (BBMap v38.94) and aligned to the SC5314 A21
@@ -68,6 +68,8 @@ Deeptools for GC bias correction and samtools for depth and SNP calling. See
 "candida_gc.sh", "candida_ymap.sh", "berman_count_snps_v5.py" and
 "genome_vis.R". All plots are uploaded to the Selmecki google drive in
 2023_Clinical_MEC_isolates.
+
+## HaplotypeCaller variant calling, annotation, filtering
 
 ## Phylogenetic tree building
 ### MEC isolates only:

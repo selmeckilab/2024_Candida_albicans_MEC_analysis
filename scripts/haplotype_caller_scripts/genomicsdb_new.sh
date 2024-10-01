@@ -18,6 +18,7 @@ sample_list=Calbicans_part9.sample_map
 mkdir -p db
 
 # Load modules
+module load python
 module load gatk/4.4.0
 
 gatk --java-options "-Xmx9g" GenomicsDBImport \

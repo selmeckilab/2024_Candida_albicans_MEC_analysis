@@ -26,6 +26,7 @@ strain=$(basename $bam | cut -d "_" -f 1)
 mkdir -p gvcf
 
 # Load modules
+module load python
 module load gatk/4.1.2
 
 # HaplotypeCaller and Genotype

@@ -12,7 +12,7 @@
 set -ue
 set -o pipefail
 
-export BCFTOOLS_PLUGINS=/home/selmecki/shared/software/software.install/bcftools/1.17/plugins
+export BCFTOOLS_PLUGINS=/home/selmecki/shared/software/software.install/bcftools/1.17/libexec/bcftools/
 
 chr_dir=chr_vcf # location of vcf files to combine
 raw_vcf=Calbicans_MEC_strains.vcf.gz  # include .vcf

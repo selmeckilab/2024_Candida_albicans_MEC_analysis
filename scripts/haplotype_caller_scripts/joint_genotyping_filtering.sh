@@ -20,6 +20,7 @@ mkdir -p genotyped_vcf
 mkdir -p filtered_vcf
 
 # Load modules
+module load python
 module load gatk/4.4.0
 module load htslib/1.9
 module load bcftools/1.10.2

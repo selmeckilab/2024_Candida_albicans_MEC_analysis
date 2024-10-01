@@ -16,6 +16,7 @@ ref=SC5314-A21
 sample_list=Calbicans_envsample_map
 
 # Load modules
+module load python
 module load gatk/4.4.0
 
 gatk --java-options "-Xmx9g" GenomicsDBImport \
