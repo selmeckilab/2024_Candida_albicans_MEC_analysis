@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
 #SBATCH --mem=20gb
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=scot0854@umn.edu
@@ -20,6 +19,8 @@ ref_fasta=/home/selmecki/shared/disaster_recovery/Reference_Genomes/SC5314_A21/C
 line=${SLURM_ARRAY_TASK_ID}
 bam_list=bam.files
 region_list=Calbicans_chroms.txt
+
+mkdir -p chr_vcf
 
 chr=$(awk -v val="$line" 'NR == val { print $0}' $region_list)
 

@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
 #SBATCH --mem=4gb
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=scot0854@umn.edu
@@ -29,11 +28,7 @@ function finish {
 }
 trap finish EXIT
 
-# Check for/create output directories
-arr=("alleles" "depth" "plots")
-for d in "${arr[@]}"; do
-    mkdir -p "$d"
-done
+mkdir -p alleles depth plots
 
 # Depth and allele counts per bam file from samtools
 
@@ -61,12 +56,11 @@ sed -i "1s/^/chr\tpos\tdepth\n/" depth/"${depth_strain}"_"${ref}"_gc_corrected_d
 # alignment), grab the columns of interest
 samtools mpileup -q 60 -f "${fasta}" "${snp_bam}" | awk '{print $1, $2, $3, $4, $5}' > alleles/"${snp_strain}".pileup
 
-# Use a borrowed python script to parse mpileup into neat columns of A, T, G, C
+# Use Darren Abbey's python script to parse mpileup into neat columns of A, T, G, C
 python3 /home/selmecki/shared/software/berman_count_snps_v5.py alleles/"${snp_strain}".pileup > alleles/"${snp_strain}"_"${ref}"_putative_SNPs.txt
 
 # Add standard header
 sed -i "1s/^/chr\tpos\tref\tA\tT\tG\tC\n/" alleles/"${snp_strain}"_"${ref}"_putative_SNPs.txt
 
 # OPTIONAL - run R script and output plots automatically
-# Make sure you've set all the variables in the  R script first!
 Rscript --vanilla genome_vis.R depth/"${depth_strain}"_"${ref}"_gc_corrected_depth.txt alleles/"${snp_strain}"_"${ref}"_putative_SNPs.txt "${depth_strain}"

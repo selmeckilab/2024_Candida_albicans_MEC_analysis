@@ -21,6 +21,9 @@ mkdir -p db
 module load python
 module load gatk/4.4.0
 
-gatk --java-options "-Xmx9g" GenomicsDBImport \
-  --genomicsdb-workspace-path db/"${species}_${ref}" \
-  -L intervals.list \
+gatk --java-options "-Xmx9g" \
+    GenomicsDBImport \
+    --genomicsdb-workspace-path db/"${species}_${ref}" \
+    -L intervals.list \
+    --sample-name-map "${sample_list}" \
+    --validate-sample-name-map true

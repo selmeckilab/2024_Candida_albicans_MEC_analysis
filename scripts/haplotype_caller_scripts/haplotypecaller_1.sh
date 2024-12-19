@@ -27,7 +27,7 @@ mkdir -p gvcf
 
 # Load modules
 module load python
-module load gatk/4.1.2
+module load gatk
 
 # HaplotypeCaller and Genotype
 gatk --java-options "-Xmx8g -XX:ParallelGCThreads=2" HaplotypeCaller \

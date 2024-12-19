@@ -114,7 +114,7 @@ def main():
 
     data = json.dumps([isolate_data])
     fields = {
-        'token': 'C6C5C96C8B35462E15BE5BFDDDE94E5F',
+        'token': '',
         'content': 'record',
         'action': 'import',
         'format': 'json',

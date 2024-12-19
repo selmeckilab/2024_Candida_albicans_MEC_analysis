@@ -1,12 +1,8 @@
 ## ---------------------------
-## Script name: calbicans_mca.R
-##
 ## Purpose of script: Perform MCA and plot resulting clusters from normalized
 ## SNP genotype data in tab-delimited table format
 ##
 ## Author: Nancy Scott
-##
-## Date Created: 2023-04-25
 ##
 ## Email: scot0854@umn.edu
 ## ---------------------------
