@@ -72,7 +72,7 @@ Deeptools for GC bias correction and samtools for depth and SNP calling. See
 ## HaplotypeCaller variant calling, annotation, filtering
 Joint genotyping is recommended for variant calling of multiple samples (i.e.,
 not combining VCF files of samples that were called separately). To facilitate
-joint genotyping of additional samples, variants were called using the GATK
+joint genotyping of additional samples in the future, variants were called using the GATK
 HaplotypeCaller workflow. Variants were called for all isolates with GATK
 v4.1.2 (see "haplotypecaller_1.sh"). A new GenomicsDB object was created and
 VCF data from all isolates was imported using the "genomicsdb_new.sh" script.
