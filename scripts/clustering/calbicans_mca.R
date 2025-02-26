@@ -1,9 +1,6 @@
 ## ---------------------------
-## Purpose of script: Perform MCA and plot resulting clusters from normalized
-## SNP genotype data in tab-delimited table format
-##
+## Purpose: Perform and plot MCA from SNP genotype table
 ## Author: Nancy Scott
-##
 ## Email: scot0854@umn.edu
 ## ---------------------------
 #!/usr/bin/env Rscript
@@ -18,9 +15,6 @@ library(tidyverse)
 library(ggplot2)
 library(ggrepel)
 library(paletteer)
-#library(ggsci)
-#library(ggtext)
-#library(glue)
 
 ##############################################################################
 # Data preparation

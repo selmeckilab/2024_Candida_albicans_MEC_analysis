@@ -35,6 +35,4 @@ find "$bam_dir" -name "*.bam" \
 
 # multiqc
 
-multiqc /scratch.global/scot0854/calbicans \
-    logs \
-    -n "$file_name"
+multiqc "${temp_dir}" logs -n "$file_name"

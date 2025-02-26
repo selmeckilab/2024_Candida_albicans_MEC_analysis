@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
 #SBATCH --mem=16gb
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=scot0854@umn.edu

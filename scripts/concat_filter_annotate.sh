@@ -11,7 +11,7 @@
 set -ue
 set -o pipefail
 
-export BCFTOOLS_PLUGINS=/home/selmecki/shared/software/software.install/bcftools/1.17/libexec/bcftools/
+export BCFTOOLS_PLUGINS=/home/selmecki/shared/software/software.install/bcftools/1.17/plugins
 
 chr_dir=chr_vcf # location of vcf files to combine
 raw_vcf=Calbicans_MEC_strains.vcf.gz  # include .vcf
@@ -86,7 +86,8 @@ bcftools view -i \
 java -Xmx9g -jar "${snpeff}" -c "${snpeff_config}" "${snpeff_db}" \
 "${bcftools_out}" >  "${annotate_vcf}"
 
-# Subset to biallelic SNPs, output tab-delimited genotype file.
+# Subset to biallelic SNPs, output tab-delimited genotype file,
+# use for multiple correspondence analysis
 module unload bcftools
 module load bcftools/1.9
 

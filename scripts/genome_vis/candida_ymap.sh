@@ -7,7 +7,7 @@
 #SBATCH -p msismall,msilarge
 #SBATCH -o %j.out
 #SBATCH -e %j.err
-#SBATCH --array=2-100
+#SBATCH --array=1-100
 set -ue
 set -o pipefail
 
@@ -30,8 +30,7 @@ trap finish EXIT
 
 mkdir -p alleles depth plots
 
-# Depth and allele counts per bam file from samtools
-
+# file and strain names 
 snp_bam=$(awk -v val="$line" 'NR == val {print $0}' $snp_bam_file)
 depth_bam=$(awk -v val="$line" 'NR == val {print $0}' $depth_bam_file)
 snp_strain=$(basename "$snp_bam" | cut -d "_" -f 1)
@@ -56,7 +55,7 @@ sed -i "1s/^/chr\tpos\tdepth\n/" depth/"${depth_strain}"_"${ref}"_gc_corrected_d
 # alignment), grab the columns of interest
 samtools mpileup -q 60 -f "${fasta}" "${snp_bam}" | awk '{print $1, $2, $3, $4, $5}' > alleles/"${snp_strain}".pileup
 
-# Use Darren Abbey's python script to parse mpileup into neat columns of A, T, G, C
+# Use a borrowed python script to parse mpileup into neat columns of A, T, G, C
 python3 /home/selmecki/shared/software/berman_count_snps_v5.py alleles/"${snp_strain}".pileup > alleles/"${snp_strain}"_"${ref}"_putative_SNPs.txt
 
 # Add standard header

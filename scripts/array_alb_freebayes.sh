@@ -20,11 +20,11 @@ line=${SLURM_ARRAY_TASK_ID}
 bam_list=bam.files
 region_list=Calbicans_chroms.txt
 
-mkdir -p chr_vcf
-
 chr=$(awk -v val="$line" 'NR == val { print $0}' $region_list)
 
-#Load modules
+mkdir -p chr_vcf
+
+# Load modules
 module load samtools/1.10
 module load freebayes/20180409
 

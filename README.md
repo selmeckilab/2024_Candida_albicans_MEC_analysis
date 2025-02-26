@@ -1,4 +1,4 @@
-# Candida albicans MEC isolate analysis
+# *Candida albicans* MEC isolate analysis
 
 ## Isolates
 There are 100 *C. albicans* MEC isolates analyzed for this project (see
