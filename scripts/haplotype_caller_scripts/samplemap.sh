@@ -1,12 +1,11 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem=1gb
 #SBATCH -o %j.out
 #SBATCH -e %j.err
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=scot0854@umn.edu
-#SBATCH --time=1:00:00
+#SBATCH -t 15
 #SBATCH -p msismall,msilarge
 
 set -ue

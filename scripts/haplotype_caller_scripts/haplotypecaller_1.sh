@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --ntasks=2
+#SBATCH --ntasks=4
 #SBATCH --mem=12gb
 #SBATCH -o %A_%a.out
 #SBATCH -e %A_%a.err
@@ -8,7 +8,7 @@
 #SBATCH --mail-user=scot0854@umn.edu
 #SBATCH --time=6:00:00
 #SBATCH -p msismall,msilarge
-#SBATCH --array=1-304
+#SBATCH --array=1-2
 
 set -ue
 set -o pipefail
