@@ -15,7 +15,7 @@ set -o pipefail
 seed=309
 bootstrap=100
 in_file=Calbicans_2024_09_26_combined_datasets.min309.phy
-threads=128
+threads=126
 out_file=Calbicans_309
 
 module load raxml/8.2.11_pthread
