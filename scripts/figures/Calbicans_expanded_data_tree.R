@@ -6,6 +6,7 @@
 options(scipen = 999)
 ## ---------------------------
 # Load packages
+library(tidyverse)
 library(ggtree)
 library(paletteer)
 library(phangorn)
@@ -13,16 +14,15 @@ library(readxl)
 library(tidytree)
 library(treeio)
 library(castor)
-library(tidyverse)
 
 species <- "Calbicans"
 
-raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calb299"
+raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_309"
 
 metadata_file <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 
 # Clade colors
-color_file <- read.table("Candida_albicans/plotting_scripts/data/clade_colors.txt")
+color_file <- read.table("scripts/figures/data/clade_colors.txt")
 clade_colors <- color_file[,2]
 names(clade_colors) <- color_file[,1]
 
@@ -62,22 +62,24 @@ Candida_tree <- Candida_raxml_midpoint %>% full_join(Candida_metadata, by = "lab
 midpoint_plot <- ggtree(Candida_tree,
                         aes(size = (as.numeric(label) < 95 | is.na(as.numeric(label)))))  +
   scale_size_manual(values = c(1, 0.3), guide = "none") +
-  #geom_tippoint(aes(subset = singletons=="yes"),color = "firebrick3", shape = 17, size=1.5) +
-  #geom_tiplab(aes(subset = singletons=="yes", 
-  #                label = mec_isolate_code), 
-  #            size=2, align = TRUE, 
-  #            linetype = "dotted", 
-  #            linesize = 0.2) + 
+  geom_tippoint(aes(subset = !is.na(singletons)),color = "firebrick3", shape = 17, size=1.5) +
+  geom_tiplab(aes(subset = !is.na(singletons), 
+                  label = mec_isolate_code), 
+              size=2, 
+              align = TRUE, 
+              offset = -0.008,
+              linetype = "dotted", 
+              linesize = 0.2) + 
   geom_rootedge() +
   scale_fill_manual(values = clade_colors, guide = "none") + 
-  geom_treescale(x=0, y=-0.3) +
-  geom_cladelab(data = Candida_clades, 
-                mapping = aes(node = clade_node, label = Clade),
-                align = TRUE,
+  geom_treescale(x=0, y=-0.3) #+
+  #geom_cladelab(data = Candida_clades, 
+  #              mapping = aes(node = clade_node, label = Clade),
+  #              align = TRUE,
                 #offset = 0.001,
-                fontsize = 3
-                ) +
-  geom_hilight(data = Candida_clades, aes(node = clade_node, fill = Clade)) 
+  #              fontsize = 3
+  #              ) +
+  #geom_hilight(data = Candida_clades, aes(node = clade_node, fill = Clade)) 
 
 ggsave(paste0(Sys.Date(),"_",species,"_midpoint_expanded.pdf"),
        midpoint_plot, bg="white", width = 6, height = 8, units = "in")
