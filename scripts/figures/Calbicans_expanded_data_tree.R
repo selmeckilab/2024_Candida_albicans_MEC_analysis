@@ -17,9 +17,9 @@ library(castor)
 
 species <- "Calbicans"
 
-raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_309"
+raxml_file <- "/home/selmecki/scot0854//umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_310"
 
-metadata_file <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
+metadata_file <- "/home/selmecki/scot0854/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 
 # Clade colors
 color_file <- read.table("scripts/figures/data/clade_colors.txt")
@@ -37,10 +37,10 @@ longest_dist <- castor::find_farthest_tip_pair(Candida_raxml_midpoint)
 Candida_clades <- as_tibble(Candida_raxml_midpoint) %>% 
   mutate(rel_branch = branch.length/longest_dist$distance) %>% # normalize branch length to longest pairwise dist.
   filter(rel_branch > 0.05) %>% # set a minimum distance
-  filter(!node %in% parent, !grepl("^[[:alpha:]]", label)) %>% # keep only inner nodes
-  rename(clade_node = node) %>% 
-  mutate(Clade = c("1", "9", "7", "8A", "11", "8B", "8*", "4*", "4", "13", "D", "16",
-                   "18", "3", "10", "B", "2", "12", "E", "6"))
+  filter(!node %in% parent, !grepl("^[[:alpha:]]", label)) #%>% # keep only inner nodes
+  #rename(clade_node = node) %>% 
+ # mutate(Clade = c("1", "9", "7", "8A", "11", "8B", "8*", "4*", "4", "13", "D", "16",
+    #               "18", "3", "10", "B", "2", "12", "E", "6"))
 
 
 
@@ -61,8 +61,12 @@ Candida_tree <- Candida_raxml_midpoint %>% full_join(Candida_metadata, by = "lab
 # option for labeling a subset with geom_tiplab: aes(subset=(label %in% studies)) aes(subset=(label %in% long_reads))
 midpoint_plot <- ggtree(Candida_tree,
                         aes(size = (as.numeric(label) < 95 | is.na(as.numeric(label)))))  +
-  scale_size_manual(values = c(1, 0.3), guide = "none") +
-  geom_tippoint(aes(subset = !is.na(singletons)),color = "firebrick3", shape = 17, size=1.5) +
+  scale_size_manual(values = c(1, 0.3), 
+                    guide = "none") +
+  geom_tippoint(aes(subset = !is.na(singletons)),
+                color = "firebrick3", 
+                shape = 17, 
+                size=1.5) +
   geom_tiplab(aes(subset = !is.na(singletons), 
                   label = mec_isolate_code), 
               size=2, 
@@ -70,9 +74,18 @@ midpoint_plot <- ggtree(Candida_tree,
               offset = -0.008,
               linetype = "dotted", 
               linesize = 0.2) + 
+  geom_tiplab(aes(subset = !is.na(ref_genome),
+                  label = mec_isolate_code),
+              size = 2,
+              align = TRUE,
+              offset = -0.008,
+              linetype = "dotted",
+              linesize = 0.2) + 
   geom_rootedge() +
-  scale_fill_manual(values = clade_colors, guide = "none") + 
-  geom_treescale(x=0, y=-0.3) #+
+  scale_fill_manual(values = clade_colors, 
+                    guide = "none") + 
+  geom_treescale(x=0, 
+                 y=-0.3) #+
   #geom_cladelab(data = Candida_clades, 
   #              mapping = aes(node = clade_node, label = Clade),
   #              align = TRUE,
