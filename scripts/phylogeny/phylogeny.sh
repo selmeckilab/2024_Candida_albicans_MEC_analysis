@@ -12,11 +12,11 @@
 set -ue
 set -o pipefail
 
-seed=309
+seed=310
 bootstrap=100
-in_file=Calbicans_2024_09_26_combined_datasets.min309.phy
+in_file=Calbicans_SC5314-A21_filtered_merged.min310.phy
 threads=126
-out_file=Calbicans_309
+out_file=Calbicans_310
 
 module load raxml/8.2.11_pthread
 

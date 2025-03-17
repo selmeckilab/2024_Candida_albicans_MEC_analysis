@@ -5,7 +5,7 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=scot0854@umn.edu
 #SBATCH --time=48:00:00
-#SBATCH -p msismall,msibigmem
+#SBATCH -p msismall
 
 set -ue
 set -o pipefail
@@ -15,6 +15,7 @@ ploidy_number=2
 reference_fasta=/home/selmecki/shared/disaster_recovery/Reference_Genomes/SC5314_A21/C_albicans_SC5314_version_A21-s02-m09-r08_chromosomes.fasta
 species=Calbicans
 ref=SC5314-A21
+regions=/home/selmecki/shared/2021_Calbicans_Erayil/scripts/SC5314_A21_regions.bed
 
 mkdir -p genotyped_vcf
 mkdir -p filtered_vcf
@@ -22,8 +23,8 @@ mkdir -p filtered_vcf
 # Load modules
 module load python
 module load gatk/4.4.0
-module load htslib/1.9
-module load bcftools/1.10.2
+module load htslib
+module load bcftools
 
 # Joint genotyping
 gatk --java-options "-Xmx29g" GenotypeGVCFs \
@@ -92,12 +93,20 @@ gatk SelectVariants \
 -O filtered_vcf/"${species}"_"${ref}"_indels_select.vcf \
 -select "vc.isNotFiltered()"
 
-# Merge final vars
+# Merge vars
 gatk MergeVcfs \
     --INPUT filtered_vcf/"${species}"_"${ref}"_snps_select.vcf \
     --INPUT filtered_vcf/"${species}"_"${ref}"_indels_select.vcf \
-    --OUTPUT "${species}"_"${ref}"_filtered_merged.vcf
+    --OUTPUT "${species}"_"${ref}"_merged.vcf
 
-bgzip "${species}"_"${ref}"_filtered_merged.vcf
+bgzip "${species}"_"${ref}"_merged.vcf
+tabix "${species}"_"${ref}"_merged.vcf.gz
+
+# Filter out repetitive regions and compress
+bcftools view \
+    -R "${regions}" \
+    "${species}"_"${ref}"_merged.vcf.gz \
+    -Oz \
+    -o "${species}"_"${ref}"_filtered_merged.vcf.gz
+
 tabix "${species}"_"${ref}"_filtered_merged.vcf.gz
-
