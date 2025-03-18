@@ -1,11 +1,10 @@
-## ---------------------------
-## Purpose of script: Input, manipulate and plot phylogenetic tree data
+## Purpose: Input, manipulate and plot phylogenetic tree data
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
+
 options(scipen = 999)
-## ---------------------------
-# Load packages
+
+## Load packages----
 library(tidyverse)
 library(ggtree)
 library(paletteer)
@@ -15,6 +14,7 @@ library(tidytree)
 library(treeio)
 library(castor)
 
+## Variables----
 species <- "Calbicans"
 
 raxml_file <- "/home/selmecki/scot0854//umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_310"
@@ -32,7 +32,16 @@ Candida_raxml_midpoint <- midpoint(Candida_raxml, node.labels = "support") # kee
 
 #ggtree(Candida_raxml_midpoint) + geom_label2(aes(subset = !isTip, label = label), size =2)
 
-# Clade determination: selecting a branch length (or relative branch length)
+## Metadata----
+Candida_metadata <- read_excel(metadata_file)
+Candida_metadata[Candida_metadata=="NA"] <- NA
+Candida_metadata <- rename(Candida_metadata, label = sample)
+Candida_metadata$mec_pt_code <- as.character(Candida_metadata$mec_pt_code)
+Candida_metadata$cluster <- as.character(Candida_metadata$pt_cluster)
+Candida_metadata$ST <- as.character(Candida_metadata$ST)
+
+## Clade determination----
+# Selecting a branch length (or relative branch length)
 longest_dist <- castor::find_farthest_tip_pair(Candida_raxml_midpoint)
 Candida_clades <- as_tibble(Candida_raxml_midpoint) %>% 
   mutate(rel_branch = branch.length/longest_dist$distance) %>% # normalize branch length to longest pairwise dist.
@@ -42,17 +51,7 @@ Candida_clades <- as_tibble(Candida_raxml_midpoint) %>%
  # mutate(Clade = c("1", "9", "7", "8A", "11", "8B", "8*", "4*", "4", "13", "D", "16",
     #               "18", "3", "10", "B", "2", "12", "E", "6"))
 
-
-
-# Metadata
-Candida_metadata <- read_excel(metadata_file)
-Candida_metadata[Candida_metadata=="NA"] <- NA
-Candida_metadata <- rename(Candida_metadata, label = sample)
-Candida_metadata$mec_pt_code <- as.character(Candida_metadata$mec_pt_code)
-Candida_metadata$cluster <- as.character(Candida_metadata$pt_cluster)
-Candida_metadata$ST <- as.character(Candida_metadata$ST)
-
-# Tree object combining phylo and metadata
+## Tree object combining phylo and metadata----
 Candida_tree <- Candida_raxml_midpoint %>% full_join(Candida_metadata, by = "label")
 
 #Candida_distances <- castor::get_all_pairwise_distances(Candida_raxml_midpoint)
@@ -94,10 +93,11 @@ midpoint_plot <- ggtree(Candida_tree,
   #              ) +
   #geom_hilight(data = Candida_clades, aes(node = clade_node, fill = Clade)) 
 
+## Save tree----
 ggsave(paste0(Sys.Date(),"_",species,"_midpoint_expanded.pdf"),
        midpoint_plot, bg="white", width = 6, height = 8, units = "in")
 
-# Write out sample list in order of tips
+## Write out sample list in order of tips----
 write.csv(get_taxa_name(midpoint_plot), 
           "Calbicans_expanded_data_raxml_midpoint_tips.csv", 
           quote = FALSE,

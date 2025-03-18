@@ -13,7 +13,6 @@ set -o pipefail
 
 export BCFTOOLS_PLUGINS=/home/selmecki/shared/software/software.install/bcftools/1.17/plugins
 
-chr_dir=chr_vcf # location of vcf files to combine
 raw_vcf=Calbicans_MEC_strains.vcf.gz  # include .vcf
 gene_file=Calbicans_SC5314_A21_sorted_genes.bed.gz
 gene_vcf=Calbicans_MEC_info_strains.vcf.gz

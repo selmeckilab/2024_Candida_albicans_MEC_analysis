@@ -1,11 +1,8 @@
-## ---------------------------
 ## Purpose: Calculate and plot pairwise differing sites or alleles
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
-#options(scipen = 999)
-## ---------------------------
-## load packages
+
+## Load packages----
 library(vcfR)
 library(poppr)
 library(tidyverse)
@@ -14,22 +11,24 @@ library(rstatix)
 library(scales)
 library(patchwork)
 
-source("redcap_MIC_summary.R")
-
+## Variables--
 species <- "C. albicans"
 in_variant_file <- "~/umn/data/variants/Calbicans/Calbicans_MEC_bwa_filtered_annotated.vcf.gz"
 in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 ordered_patient_data <-  "~/umn/data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
 save_dir <- "~/umn/images/Calbicans/"
-
 species_ploidy <- 2
+color_file <- read.table("ch3/clade_colors.txt")
 
 # Clade colors
-color_file <- read.table("ch3/clade_colors.txt")
 clade_colors <- color_file[,2]
 names(clade_colors) <- color_file[,1]
 
-## create genlight object from vcf file (can be .gz) and separate sample population file
+## Get phenotyping and sample data----
+source("scripts/figures/Calbicans_redcap_summary.R")
+
+## Create genlight object----
+# Made from vcf file (can be .gz) and separate sample population file
 vcf <- read.vcfR(in_variant_file)
 
 pop.data <- read_excel(in_patient_data)
@@ -44,12 +43,13 @@ all(colnames(vcf@gt)[-1] %in% pop.data$sample[1:100])
 gl_species <- vcfR2genlight(vcf)
 ploidy(gl_species) <- species_ploidy
 
-# Get distance matrix
+## Get distance matrix----
 # setting differences_only to TRUE matches plink 1.9 --genome full output (IBS0 + IBS1 per row)
 # differences_only FALSE counts differences in alleles, not just genotypes
 intra_species_false <- bitwise.dist(gl_species, percent = FALSE, mat = TRUE, differences_only = FALSE)
 intra_species_true <- bitwise.dist(gl_species, percent = FALSE, mat = TRUE, differences_only = TRUE)
 
+## Pivot and annotate----
 # Pivot longer, add names
 intra_species_false <- intra_species_false[pt_order$sample, pt_order$sample]
 
@@ -93,12 +93,11 @@ intra_strain_dist <- intra_strain_dist %>%
 serial_intra_dist <- intra_strain_dist %>% 
   filter(days_apart < 20)
 
-# Isolate collection ranges mean don't bother reporting this
+# Isolate collection ranges mean, don't bother reporting this
 correlation::correlation(serial_intra_dist, select = c("value", "days_apart"))
 ggplot(intra_strain_dist, aes(x = value, y = days_apart, color = cluster1)) + 
   geom_point() #+
   #scale_color_manual(values = paletteer_d("ggthemes::Tableau_20"))
-
 
 clade_pt_intra_dist_summary <- intra_strain_dist %>% 
   filter(!cluster1 %in% c("S2", "S3", "S4", "S5")) %>% 
@@ -128,13 +127,13 @@ cladewise_all_dist_summary <- cladewise_intra_dist_summary %>%
   mutate(ratio_min = round(min_inter_dist/max_intra_dist, digits = 2), 
          ratio_max = round(max_inter_dist/max_intra_dist, digits = 2))
 
-# Save dist counts
+## Save dist counts----
 write.csv(snp_dist, "~/umn/data/variants/Calbicans/2023_Calbicans_MEC_pairwise_snp_count.csv", row.names = FALSE)
 #write.csv(intra_strain_dist, "~/umn/data/variants/Calbicans/2023_Calbicans_MEC_intra_strain_snps.csv", row.names = FALSE)
 #write.csv(inter_strain_dist, "~/umn/data/variants/Calbicans/2023_Calbicans_MEC_inter_strain_snps.csv", row.names = FALSE)
 write.csv(cladewise_all_dist_summary, "~/umn/data/variants/Calbicans/2023_Calbicans_cladewise_all_dists.csv", row.names = FALSE)
 
-# Plot heatmap of pairwise SNP distances
+## Plot heatmap of pairwise SNP distances----
 snp_matrix <- ggplot(snp_dist, aes(Var1, Var2)) +
   geom_tile(aes(fill = value, colour = value),linewidth = 0.27) +
   scale_color_gradient(na.value = "white", low = "white", high = "#B22222",guide = "none") +

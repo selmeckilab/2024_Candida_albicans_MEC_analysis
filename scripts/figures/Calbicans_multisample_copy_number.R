@@ -1,14 +1,14 @@
-### ---------------------------
 ## Purpose: plot all relative copy number data for a group of samples on a single linear ideogram
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
-# Load packages
+
+## Load packages----
 library(readxl)
 library(tidyverse)
 library(paletteer)
 library(patchwork)
 
+## Variables----
 spreadsheet_list <- "~/umn/data/metadata/Calbicans_snp_depth_paths.txt"
 feature_file <- "~/umn/Candida_genome_visualization/ref_genome_files/Calbicans_SC5314_A21_plotting_features.txt"
 label_file <-  "~/umn/Candida_genome_visualization/ref_genome_files/Calbicans_SC5314_A21_chr_labels.txt"
@@ -37,15 +37,14 @@ inter_chr_spacing <- 150000 # size of space between chrs
 chrom_outline_color <- "gray15"  # color of chromosome outlines
 chrom_line_width <- 0.5  # line width of chromosome outlines
 
-################################################################################
 # X-axis labels overwrite input scaffold names in final plot
 chr_ids <- scan(label_file, what = character())
 
-# Read in patient metadata
+## Read in patient metadata----
 pop_data <- read_xlsx(patient_data)
 pop_data[pop_data=="NA"] <- NA
 
-# Read in and combine depth data for all isolates
+## Read in and combine depth data for all isolates----
 depth_files <- scan(spreadsheet_list, what=character())
 
 genome_depth <- read_xlsx(depth_files[1]) %>%
@@ -76,6 +75,7 @@ genome_depth <- genome_depth %>%
 
 genome_depth <- genome_depth %>% inner_join(pop_data, by=join_by(sample))
 
+## Plotting details----
 # Small dataframes for chrom. outlines and features
 chroms <- genome_depth %>%
   group_by(index) %>%
@@ -94,9 +94,7 @@ features <- features %>%
 ticks <- tapply(genome_depth$plot_pos, genome_depth$index, quantile, probs =
                   0.5, na.remove = TRUE)
 
-################################################################################
-# Plot subset of isolates and combine with patchwork 
-
+## Plot subsets of isolates and combine with patchwork----
 for(k in 1:length(patient_series)){
   for(j in 1:length(patient_series[[k]])){
       tmp <- genome_depth %>%
@@ -136,8 +134,7 @@ for(k in 1:length(patient_series)){
     }
 }
 
-# Stack plots
-
+## Stack CNV and aneuploid plots----
 # Triploid and tetraploid MECs
 ploidy_changes <- (MEC324 + theme(plot.margin = margin(b=8)))/
   (MEC185 + theme(plot.margin = margin(b=0)))
@@ -175,10 +172,10 @@ ggsave(paste0(save_dir,Sys.Date(),"_Calbicans_MEC_segmental_aneuploidy.pdf"),
        height = 2.7,
        units = "in")
 
-################################################################################
-# CNV subsetting for small possible NAHR in 2 series
-
+## CNV subsetting for small possible NAHR in 2 series----
 zoom_inter_chr_spacing <- 50000
+
+## Small CNV series 1----
 small_cnv <- genome_depth %>% 
   filter(sample %in% c("MEC198", "MEC199", "MEC200", "MEC201"), 
          index %in% c(2,6))
@@ -243,7 +240,7 @@ for(k in 1:length(patient_series)){
   }
 }
 
-
+## Small CNV series 2----
 small_cnv2 <- genome_depth %>% 
   filter(sample %in% c("MEC246", "MEC248", "MEC249", "MEC254"), 
          index %in% c(1,2))
@@ -308,7 +305,7 @@ for(k in 1:length(patient_series)){
   }
 }
 
-
+## Stack small CNV plots----
 small_cnvs <- (MEC218+ theme(plot.margin = margin(b=0)))/
   (MEC219+ theme(plot.margin = margin(b=12)))/
   (MEC198+ theme(plot.margin = margin(b=0)))/
@@ -320,14 +317,14 @@ small_cnvs <- (MEC218+ theme(plot.margin = margin(b=0)))/
   (MEC249+ theme(plot.margin = margin(b=0)))/
   (MEC254+ theme(plot.margin = margin(b=0)))
 
+# Save plot
 ggsave(paste0(save_dir,Sys.Date(),"_Calbicans_MEC_small_CNVs.pdf"),
        small_cnvs,
        width = 6,
        height = 6,
        units = "in")
 
-################################################################################
-# Plot linear genome for all isolates together - points colored by pt
+## Plot linear genome for all isolates together - points colored by pt----
 p <- genome_depth %>%
   group_by(sample) %>%
   ggplot() +

@@ -1,25 +1,32 @@
-################################################################################
 ## Purpose: Overlap GC-corrected read depth with gene locations to find candidate
 ## copy number changes
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-################################################################################
 
+## Load packages----
 library(readxl)
 library(tidyverse)
 library(GenomicRanges)
 library(regioneR)
 library(rtracklayer)
 
-# Sample inputs
+## Sample inputs----
 spreadsheet_list <- "Calbicans_MEC_500bp_depth.txt"
 copy_number_files <- scan(spreadsheet_list, what=character())
 
-# Genome inputs
+## Genome inputs----
 candida_gff <- "~/umn/data/reference_genome_coords/Calbicans/C_albicans_SC5314_A21_current_features.gff"
 region_file <- "~/umn/data/reference_genome_coords/SC5314_A21_SV_region_file.bed"
 
-# Function returns GRange of gene candidates, either above or below relative_depth threshold, with minimum specified overlap
+## Get genes----
+features <- import.gff(candida_gff)
+genes <- features[features$type=="gene"]
+
+## Get ranges of interest (not repeat regions, LTRs, retrotransposons)----
+regions <- import.bed(region_file)
+
+## Function to get candidate genes----
+# Returns GRange of gene candidates, either above or below relative_depth threshold, with minimum specified overlap
 coverage_function <- function(depth_range, gene_range, op, threshold, overlap_fraction){
   cov1 <-depth_range[get(op)(depth_range$relative_depth, threshold)]
   cov <- reduce(cov1)
@@ -36,13 +43,7 @@ coverage_function <- function(depth_range, gene_range, op, threshold, overlap_fr
 }
 
 
-# GFF
-features <- import.gff(candida_gff)
-genes <- features[features$type=="gene"]
-
-# Ranges of interest (not repeat regions, LTRs, retrotransposons)
-regions <- import.bed(region_file)
-
+## Process files----
 # Read in 
 for(i in 1:length(copy_number_files)){
   sample_id <- str_extract(copy_number_files[i], "AMS[:digit:]+|MEC[:digit:]+")

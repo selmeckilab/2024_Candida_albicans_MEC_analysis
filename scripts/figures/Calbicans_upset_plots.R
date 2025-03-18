@@ -1,9 +1,8 @@
-## ---------------------------
 ## Purpose: Plot intersection of SNPs in series 
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
 
+## Load packages----
 library(UpSetR)
 library(tidyverse)
 

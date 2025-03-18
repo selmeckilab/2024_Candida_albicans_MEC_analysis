@@ -7,8 +7,11 @@ to separately call variants on samples individually and then combine them.
 
 ## Workflow:
 
+0. If samples have widely varying sequencind depth, consider subsampling bams for
+more consistency (see "array_subsample.sh").
+
 1. Variants are called on individual samples. See "haplotypecaller_1.sh" which is
-an array with 1 job per sample
+a slurm array.
 
 2. A sample map is generated, see "samplemap.sh". You can also just manually make
 this, it's a tabbed file with sample name and path to individual vcf

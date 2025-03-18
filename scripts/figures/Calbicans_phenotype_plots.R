@@ -1,13 +1,15 @@
-## ---------------------------
 ## Purpose: Summary plots of growth curve metrics
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
 options(scipen = 999) 
 
-source("ch3/Calbicans_redcap_summary.R")
+## Load packages----
 library(patchwork)
 library(ggbeeswarm)
+
+## Get phenotyping data----
+source("scripts/figures/Calbicans_redcap_summary.R")
+
 
 calbicans_isolates <- sample_info %>% 
   filter(genus_species=="C. albicans") %>%
@@ -17,7 +19,7 @@ drugs <- as_labeller(c(fluconazole="Fluconazole",
                        micafungin="Micafungin",
                        `amphotericin B` = "Amphotericin B"))
 
-# Growth rate
+## Growth rate beeswarm plot----
 gc_r <- gc %>% right_join(calbicans_isolates) %>% 
   ggplot(aes(x = genus_species, y = r)) +
   geom_beeswarm(size=1, cex = 3, color = "#88CCEE") +
@@ -26,7 +28,7 @@ gc_r <- gc %>% right_join(calbicans_isolates) %>%
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank())
 
-# Carrying capacity in YPAD
+## Carrying capacity beeswarm plot----
 gc_k <- gc %>% right_join(calbicans_isolates) %>% 
   ggplot(aes(x = genus_species, y = k)) +
   geom_beeswarm(size=1, cex = 3, color = "#72b7f4") +
@@ -35,15 +37,7 @@ gc_k <- gc %>% right_join(calbicans_isolates) %>%
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank())
 
-# Carrying capacity in RPMI
-rpmi_k <- control_od %>% filter(genus_species=="C. albicans") %>% 
-  ggplot(aes(x = genus_species, y = mean_stationary_k)) +
-  geom_beeswarm(size=1, cex = 3, color = "#5ba1f9") +
-  ylab("OD530, RPMI") +
-  theme_bw() +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank())
-
+# FLC SMG beeswarm plot----
 flc_smg <- ggplot(mic_info %>% filter(genus_species == "C. albicans", drug=="fluconazole"), 
                   aes(x = genus_species, y = mean_smg)) +
  geom_beeswarm(size=1, cex = 3, color = "#458CFF") +
@@ -52,16 +46,18 @@ flc_smg <- ggplot(mic_info %>% filter(genus_species == "C. albicans", drug=="flu
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank())
 
+
+## Stack plots----
 all_phenos <- gc_r + gc_k + rpmi_k + flc_smg + plot_annotation(tag_levels = "A")
 
+## Save plots----
 ggsave(paste0(Sys.Date(),"_Calbicans_MEC_phenotypes.pdf"),
        all_phenos,
        width = 6,
        height = 4,
        units = "in")
 
-###############################################################################
-# MIC sub-plots
+## MIC sub-plots----
 flc <- ggplot(mic_info %>% filter(genus_species == "C. albicans", drug=="fluconazole"), aes(x=mic50))+
     geom_bar(fill = "#88CCEE", just = 1) +
     #scale_fill_manual(values = species_colors, guide = "none") +

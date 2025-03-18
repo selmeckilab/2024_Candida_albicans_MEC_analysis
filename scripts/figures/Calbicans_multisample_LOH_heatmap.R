@@ -1,16 +1,15 @@
-## ---------------------------
 ## Purpose: Combine het SNP counts and generate heatmap across chrs for a group of isolates
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
 
-# Load packages
+## Load packages----
 library(readxl)
 library(tidyverse)
 library(ggplot2)
 library(paletteer)
 library(writexl)
 
+## Variables----
 spreadsheet_list <- "~/umn/data/metadata/Calbicans_snp_depth_paths.txt"
 ordered_patient_data <- "~/umn/data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
 in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
@@ -18,7 +17,7 @@ save_dir <- "~/umn/images/Calbicans/"
 
 binned_color_scale <- c("white", paletteer_c("grDevices::Turku", 30))
 
-# Read in SNP counts for all samples
+## Read in SNP counts for all samples----
 snp_files <- scan(spreadsheet_list, what=character())
 
 genome_snp <- read_xlsx(snp_files[1]) %>%
@@ -34,7 +33,9 @@ for(i in 2:101){
     left_join(new_snp, by = join_by(index,pos))
 }
 
-# For plotting: regular intervals for x-axis
+## Plotting details----
+
+# Regular intervals for x-axis
 genome_snp$x_num <- seq.int(nrow(genome_snp))
 
 # Finish tidying data
@@ -44,7 +45,7 @@ snp_again <- genome_snp %>%
 snp_again <- snp_again %>% 
   mutate(sample = replace(sample, sample=="MEC103", "MEC103-2"))
 
-# For plotting: chr outlines and tick marks
+# Chr outlines and tick marks
 chrs <- genome_snp %>%
   group_by(index) %>%
   summarise(border_start=min(x_num),
@@ -60,8 +61,7 @@ pt_order <- read.csv(ordered_patient_data, header = TRUE)
 pt_order <- pt_order %>%
   left_join(pop.data %>% filter(study=="MEC") %>% select(sample, mec_pt_code, mec_isolate_code))
 
-################################################################################
-# Plot
+## Plot with manually annotated clade breaks----
 p <- snp_again %>%
   mutate(clustered_samples = fct_relevel(sample, rev(pt_order$sample))) %>%
   ggplot(aes(x=x_num, y=clustered_samples)) +
@@ -109,6 +109,7 @@ p <- snp_again %>%
 # Troubleshooting: what are the axis positions per sample?
 #details <- ggplot_build(p)
 
+## Save plot----
 ggsave(paste0(save_dir,Sys.Date(),"_MEC_Calbicans_LOH_heatmap.pdf"), 
        p, 
        #device=png, 

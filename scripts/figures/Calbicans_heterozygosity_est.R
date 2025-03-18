@@ -1,31 +1,31 @@
-## ---------------------------
 ## Purpose: Calculate genome heterozygosity % and plot distribution
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
 options(scipen = 999)
 
-source("~/umn/thesis/ch3/Calbicans_redcap_summary.R")
+## Get phenotyping data----
+# *C. albicans* specific data from candidemia phenotyping manuscript
+source("scripts/figures/Calbicans_redcap_summary.R")
 
-# Load packages
+sample_naming <- sample_info %>% 
+  mutate(join_id = case_when(!is.na(secondary_id) ~ secondary_id, .default = primary_id)) %>%
+  select(primary_id, join_id)
+
+## Load packages----
 library(readxl)
 library(tidyverse)
 library(writexl)
 library(correlation)
 library(patchwork)
 
-# Input vars
+## Variables----
 spreadsheet_list <- "~/umn/data/metadata/Calbicans_snp_depth_paths.txt"
 in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 ordered_patient_data <-  "~/umn/data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
-chr_size <- "~/umn/thesis/ch3/Calbicans_chr_lengths.csv"
+chr_size <- "scripts/figures/data/Calbicans_chr_lengths.csv"
 save_dir <- "~/umn/images/Calbicans/"
 genome_size <- 14324315
-
-# Clade colors
-color_file <- read.table("ch3/clade_colors.txt")
-clade_colors <- color_file[,2]
-names(clade_colors) <- color_file[,1]
+color_file <- read.table("scripts/figures/data/clade_colors.txt")
 
 # Metadata
 pop_data <- read_excel(in_patient_data)
@@ -35,12 +35,16 @@ pt_order <- read.csv(ordered_patient_data, header = TRUE)
 pt_order <- pt_order %>%
   left_join(pop_data %>% filter(study=="MEC") %>% select(sample, mec_pt_code, mec_isolate_code))
 
+# Plotting info
 chrs <- read.csv(chr_size, header = TRUE)
 
 chr_labels <- as_labeller(c("1"="Chr1","2"="Chr2", "3"="Chr3", "4"="Chr4",
                             "5"="Chr5", "6"="Chr6", "7"="Chr7", "8"="ChrR"))
 
-# Read in SNP counts for all samples
+clade_colors <- color_file[,2]
+names(clade_colors) <- color_file[,1]
+
+## Read in SNP counts for all samples----
 snp_files <- scan(spreadsheet_list, what=character())
 
 genome_snp <- read_xlsx(snp_files[1]) %>%
@@ -61,9 +65,7 @@ snp_again <- genome_snp %>%
   mutate(sample = replace(sample, sample=="MEC103", "MEC103-2")) %>% 
   left_join(sample_naming, by = c("sample" = "join_id"))
 
-
-
-# Estimate het % for genome and chrs
+## Estimate het % for genome and chrs----
 snp_total <- snp_again %>% 
   group_by(sample) %>%
   summarize(all_snps = sum(snp_count, na.rm = TRUE)) %>%
@@ -98,41 +100,30 @@ chr_summary <- chr_total %>% group_by(index) %>%
   summarise(min_het = min(chr_het_percent), max_het = max(chr_het_percent),
             mean_het = mean(chr_het_percent), median_het = median(chr_het_percent))
 
-################################################################################
-# Correlation tests
-
+## Correlation tests----
+# overall heterozygosity, growth rate, carrying capacity
 genome_het_gc_corr <- snp_total %>% 
   filter(ploidy==2) %>% 
   left_join(gc, by = "primary_id") %>% 
   select(het_percentage, k, r) %>% 
   correlation()
 
-genome_het_rpmi_ctrl_corr <- snp_total %>% 
-  filter(ploidy==2) %>% 
-  left_join(control_od, by = "primary_id") %>% 
-  select(het_percentage, mean_stationary_k) %>% 
-  correlation()
-
+# overall heterozygosity, SMG
 genome_het_smg <- snp_total %>% 
   filter(ploidy==2) %>% 
   left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   select(het_percentage, mean_smg) %>% 
   correlation()
 
+# Per chrom heterozygosity, growth rate, carrying capacity
 chr_het_gc_corr <- chr_total %>% 
   filter(ploidy==2) %>% 
-  left_join(gc, by = "primary_id") %>% 
+  left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   group_by(index) %>% 
   select(chr_het_percent, k, r) %>% 
   correlation()
 
-chr_het_rpmi_ctrl_corr <- chr_total %>% 
-  filter(ploidy==2) %>% 
-  left_join(control_od, by = "primary_id") %>% 
-  group_by(index) %>% 
-  select(chr_het_percent, mean_stationary_k) %>% 
-  correlation()
-
+# Per chrom heterozygosity, SMG
 chr_het_smg <- chr_total %>% 
   filter(ploidy==2) %>% 
   left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
@@ -140,9 +131,7 @@ chr_het_smg <- chr_total %>%
   select(chr_het_percent, mean_smg) %>% 
   correlation()
 
-################################################################################
-#Plots
-
+## Plots----
 het_all <- ggplot(snp_total, aes(het_percentage)) +
   geom_histogram(color = "grey50", fill = "grey65", binwidth = 0.0105) +
   scale_x_continuous(limits = c(0.0,0.7)) +
