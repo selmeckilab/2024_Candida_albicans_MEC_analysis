@@ -5,14 +5,16 @@
 #SBATCH --mail-user=scot0854@umn.edu
 #SBATCH --time=1:30:00
 #SBATCH -p msismall,msilarge
-#SBATCH -o %j.out
-#SBATCH -e %j.err
-#SBATCH --array=1-100
+#SBATCH -o %A_%a.out
+#SBATCH -e %A_%a.err
+#SBATCH --array=3
+
 set -ue
 set -o pipefail
 
-module load samtools/1.10
-module load R/4.1.0
+module load python
+module load samtools
+module load R/4.3.0-openblas-rocky8
 
 line=${SLURM_ARRAY_TASK_ID}
 ref=sc5314  # short ID
@@ -30,7 +32,8 @@ trap finish EXIT
 
 mkdir -p alleles depth plots
 
-# file and strain names 
+# Depth and allele counts per bam file from samtools
+
 snp_bam=$(awk -v val="$line" 'NR == val {print $0}' $snp_bam_file)
 depth_bam=$(awk -v val="$line" 'NR == val {print $0}' $depth_bam_file)
 snp_strain=$(basename "$snp_bam" | cut -d "_" -f 1)
@@ -55,7 +58,7 @@ sed -i "1s/^/chr\tpos\tdepth\n/" depth/"${depth_strain}"_"${ref}"_gc_corrected_d
 # alignment), grab the columns of interest
 samtools mpileup -q 60 -f "${fasta}" "${snp_bam}" | awk '{print $1, $2, $3, $4, $5}' > alleles/"${snp_strain}".pileup
 
-# Use a borrowed python script to parse mpileup into neat columns of A, T, G, C
+# Use Darren Abbey's python script to parse mpileup into neat columns of A, T, G, C
 python3 /home/selmecki/shared/software/berman_count_snps_v5.py alleles/"${snp_strain}".pileup > alleles/"${snp_strain}"_"${ref}"_putative_SNPs.txt
 
 # Add standard header

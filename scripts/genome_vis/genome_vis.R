@@ -1,36 +1,30 @@
-## ---------------------------
 ## Purpose: Calculate and plot relative depth and SNP density for a given sample,
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-## ---------------------------
-## Script order is candida_gc_correct.sh -> candida_ymap.sh (uses berman_count_snps_v5.py) -> genome_vis.R
-## Can run this R script from candida_ymap.sh or interactively, see below.
-## ---------------------------
+
+# Script order is candida_gc_correct.sh -> candida_ymap.sh (uses berman_count_snps_v5.py) -> genome_vis.R
+# Can run this R script from candida_ymap.sh or interactively, see below.
+
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly = TRUE)
 
-# Input file variables
-read_depth_file <- args[1] # To run interactively, replace args[1] with "path/to/your_depth_file.txt"
-snp_file <- args[2] # or "path/to/your_putative_SNPs.txt"
-sample_id <- args[3] # or "YourID"
-mito <- "Ca19-mtDNA" # scaffold ID for subsetting
-
-## ---------------------------
-# Load packages
+## Load packages----
 library(RcppRoll)
 library(tidyverse)
 library(ggplot2)
 library(writexl)
 
-## ---------------------------
-# Data variables
+# Variables----
+read_depth_file <- args[1] # To run interactively, replace args[1] with "path/to/your_depth_file.txt"
+snp_file <- args[2] # or "path/to/your_putative_SNPs.txt"
+sample_id <- args[3] # or "YourID"
+
+ref <- "sc5314" # short label for generating file name or "" to leave out
+mito <- "Ca19-mtDNA" # scaffold ID for subsetting
+save_dir <- "plots/" # path with trailing slash, or just "" to save where you are
+
 window <- 5000 # size of window used for rolling mean and snp density
 ploidy <- 2 # will multiply this by relative read depth for copy number
-
-# Output variables
-save_dir <- "plots/" # path with trailing slash, or just "" to save where you are
-ref <- "sc5314" # short label for generating file name or "" to leave out
-
 ploidy_multiplier <- 2  # this number multiplied by ploidy sets the max-y scale
 
 inter_chr_spacing <- 150000 # size of space between chrs
@@ -50,22 +44,20 @@ chr_ids <- c("Ca21chr1_C_albicans_SC5314"="Chr1",
              "Ca21chrR_C_albicans_SC5314"="ChrR") # manual x-axis labels overwrite input scaffold names in final plot
 y_axis_labels <- seq(ploidy * ploidy_multiplier)  # set to remove 0 from axis
 
-## ---------------------------
-# Base R doesn't have a mode calculation
+## Base R doesn't have a mode calculation----
 Modes <- function(x) {
   ux <- unique(x)
   tab <- tabulate(match(x, ux))
   ux[tab == max(tab)]
 }
 
-# Reduce noise of allele frequency for plotting
+## Reduce noise of allele frequency for plotting----
 read_freq <- function(x){
   x=ifelse(x>0.95, NA, ifelse(x>=0.05, x , NA))
   return(x)
 }
 
-## ---------------------------
-# Relative copy number calcs from samtools depth input
+## Relative copy number calcs from samtools depth input----
 genome_raw <- read.table(read_depth_file, header = TRUE)
 genome_raw <- genome_raw %>%
   filter(chr != mito)
@@ -82,7 +74,7 @@ subset_chr_median <- chr_median %>%  # modest filtering to avoid aneuploidy skew
 
 genome_median <- median(subset_chr_median$chr_med)  # filtered median used to calculate relative depth
 
-# Reshaping dataframe for future plotting
+## Reshaping dataframe for future plotting----
 genome_window <- genome_raw %>%
   group_by(chr, index=consecutive_id(chr)) %>%
   reframe(position=unique((pos %/% window)*window+1))
@@ -97,7 +89,7 @@ chrs <- as.vector(unique(genome_window$chr_length))
 chr_plot <- c()
 for(i in 1:length(chrs)){chr_plot[i] <- sum(chrs[1:i-1])}
 
-# Calculate relative depth and copy number
+## Calculate relative depth and copy number----
 genome_depth <- genome_raw %>%
   group_by(chr, index=consecutive_id(chr)) %>%
   filter(pos %in% genome_window$position) %>%
@@ -106,8 +98,8 @@ genome_depth <- genome_raw %>%
   mutate(chr_sums=chr_plot[index]) %>%  # for proper x-axis plotting
   mutate(plot_pos=ifelse(index==1, pos, (pos+chr_sums+(inter_chr_spacing*(index-1))))) # for proper x-axis plotting
 
-## ---------------------------
-# SNP freq calcs (pulls in position data from genome_depth dataframe)
+## SNP freq calcs----
+# (pulls in position data from genome_depth dataframe)
 genome_snp <- read.table(snp_file, header = TRUE)
 genome_snp <- genome_snp %>%
   filter(chr != mito) %>%
@@ -132,12 +124,10 @@ gaf <- genome_snp %>%
                               (G_freq >= (1/copy_number)*0.5 & G_freq <=(1-(1/copy_number)*0.5)) |
                               (C_freq >= (1/copy_number)*0.5 & C_freq <=(1-(1/copy_number)*0.5)), na.rm = TRUE))
 
-## ---------------------------
-# Final dataframe of joined copy number, snps, and plotting positions per window
+## Final dataframe of joined copy number, snps, and plotting positions per window----
 genome_depth <- genome_depth %>%
   left_join(gaf, by=c("chr", "pos"="snp_bin"))
 
-## ---------------------------
 # Small dataframe to plot chromosome outlines
 chroms <- genome_depth %>%
   group_by(index) %>%
@@ -147,7 +137,7 @@ chroms <- genome_depth %>%
 ticks <- tapply(genome_depth$plot_pos, genome_depth$index, quantile, probs =
                 0.5, na.remove = TRUE)
 
-# Plot linear genome
+## Plot linear genome----
 p <- ggplot(genome_depth) +
   scale_color_gradient(low=snp_low,high=snp_high, na.value = "white", guide = "none") +
   geom_segment(aes(x = plot_pos, y = 0, color = snp_count, xend = plot_pos, yend = Inf)) +
@@ -165,11 +155,11 @@ p <- ggplot(genome_depth) +
         axis.text.y = element_text(size = 10),
         axis.text.x = element_text(size=10))
 
+## Save genome plot----
 ggsave(sprintf("%s%s_%s_%s_%sbp.png", save_dir, Sys.Date(), sample_id, ref, window),
        p, width = 8, height = 1.2, units = "in", device = png, dpi=300, bg="white")
 
-## ---------------------------
-# Plot allele freqs per chr
+## Plot allele freqs per chr----
 allele_freq_histo <-   ggplot(genome_snp) +
   geom_histogram(aes(allele_1),bins=200) +
   geom_histogram(aes(allele_2), bins = 200) +
@@ -177,12 +167,12 @@ allele_freq_histo <-   ggplot(genome_snp) +
   xlab("Allele frequency") +
   ylab(sample_id)
 
+## Save AF plot----
 ggsave(sprintf("%s%s_%s_%s_allele_freq.png", save_dir, Sys.Date(), sample_id, ref),
        allele_freq_histo, width = 10, height = 1.56, units = "in", device = png,
        dpi=300)
 
-## ---------------------------
-# Save dataframes as excel
+## Save dataframes as excel----
 outfiles <- list(plotting_data=genome_depth,
                  read_depth_summary=chr_median,
                  raw_genome_median=as.data.frame(raw_genome_median),
