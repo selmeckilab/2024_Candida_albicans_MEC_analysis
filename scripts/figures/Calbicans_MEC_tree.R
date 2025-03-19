@@ -16,9 +16,9 @@ library(tidyverse)
 
 ## Variables----
 species <- "Calbicans"
-raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.MEC2"
+raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_MEC"
 metadata_file <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
-color_file <- read.table("ch3/clade_colors.txt")
+color_file <- read.table("scripts/figures/data/clade_colors.txt")
 
 # Clade colors
 clade_colors <- color_file[,2]

@@ -17,7 +17,7 @@ library(castor)
 ## Variables----
 species <- "Calbicans"
 
-raxml_file <- "/home/selmecki/scot0854//umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_310"
+raxml_file <- "/home/selmecki/scot0854/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_310"
 
 metadata_file <- "/home/selmecki/scot0854/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 

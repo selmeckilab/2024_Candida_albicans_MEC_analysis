@@ -91,7 +91,7 @@ java -Xmx9g -jar "${snpeff}" -c "${snpeff_config}" "${snpeff_db}" \
 module unload bcftools
 module load bcftools/1.9
 
-bcftools view -m2 -M2 -v "${annotate_vcf}" \
+bcftools view -m2 -M2 -v snps "${annotate_vcf}" \
     | bcftools view -e 'GT="mis"' \
     | bcftools query -H -f '%CHROM\t%POS[\t%GT]\n' >> "${genotype_table}"
 
