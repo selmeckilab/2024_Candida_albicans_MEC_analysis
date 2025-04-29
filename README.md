@@ -77,8 +77,5 @@ HaplotypeCaller workflow. Variants were called for all isolates with GATK
 v4.1.2 (see "haplotypecaller_1.sh"). A new GenomicsDB object was created and
 VCF data from all isolates was imported using the "genomicsdb_new.sh" script.
 
-## Phylogenetic tree building
-### MEC isolates only:
 
-### Expanded *C. albicans* data set:
 
