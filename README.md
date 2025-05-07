@@ -21,47 +21,44 @@ Insert sizes range from ~100 bp to > 400bp and median coverage ranges from 27x
 to 111x.
 
 ## Sequencing reads
-All fastq files are uploaded to UMN MSI (see "Calbicans_sequencing_paths.txt" for
-file locations). All files have been submitted to SRA (NCBI BioProject
-PRJNA1068683).
+All files have been submitted to SRA (NCBI BioProject PRJNA1068683).
 
 ## Trimming, alignment, QC
 Samples were trimmed with BBDuk (BBMap v38.94) and aligned to the SC5314 A21
 reference genome with bwa mem v0.7.17, default parameters, followed by sorting
-and duplicate marking with samtools v1.10 (see "array_bbduk_align_sort.sh").
+and duplicate marking with samtools v1.10 (see "scripts/classify_aliqn_qc/array_bbduk_align_sort.sh").
 Basic stats were generated with samtools flagstats. Trimmed reads and
 alignments were QC'd with FASTQC v0.11.9  and Qualimap v2.2.2-dev, and results
-compiled with MultiQC v1.13 (see "basic_qc.sh").
+compiled with MultiQC v1.13 (see "scripts/classify_align_qc/basic_qc.sh").
 Isolates with low percentage of aligned reads were investigated by
 classification of fastq files using Centrifuge v1.0.4 (see
-"array_centrifuge_classifier.sh"), removed from this analysis and updated in the
-study database if found to be a different species (MEC008 removed, MEC005 added).
-Bam files are located in align_variants_SC5314_A21_ref/bam/.
+"scripts/classify_align_qc/array_centrifuge_classifier.sh"), removed from this 
+analysis and updated in the study database if found to be a different species 
+(MEC008 removed, MEC005 added).
 
 ## Variant calling, annotation, filtering
 Variants were called with freebayes v1.1.0, with parameters of -p 2 and -C 5,
-using each chromosome as a separate region (see "array_alb_freebayes.sh").
+using each chromosome as a separate region (see "scripts/variants/array_alb_freebayes.sh").
 Chromosome concatenation, quality filtering and annotation were performed with
-BCFtools v1.17 and SnpEff v5.0e (see "concat_filter_annotate.sh").
+BCFtools v1.17 and SnpEff v5.0e (see "scripts/variants/concat_filter_annotate.sh").
 
 ## Clustering
 Variant sites with biallelic SNPs and no missing genotypes were used to
 generate a matrix for clustering ("concat_filter_annotate.sh"). Multiple
 correspondence analysis was performed using the FactoMiner package v2.9 (see
-"calbican_clustering.sh and "calbicans_mca.R"). 
+"scripts/clustering/"). 
 
 ## Multilocus sequence typing
 "Consensus sequences" of the 7 MLST loci were generated for all 100 MEC isolates
-(see "array_mlst_subsetting.sh"). The PubMLST database was queried via API to
-assign allele IDs and sequence types and to upload to REDCap (see "mlst_api.sh"
-and "pubmlst_rest.py"). New alleles were submitted to PubMLST for assignment of
+(see "scripts/mlst/"). The PubMLST database was queried via API to
+assign allele IDs and sequence types and to upload to the study database. New 
+alleles were submitted to PubMLST for assignment of
 an ID.
 
 ## Genome visualization
 A local version of YMAP's genome-wide LOH and CNV plotting was performed  using
 Deeptools for GC bias correction and samtools for depth and SNP calling. See
-"candida_gc.sh", "candida_ymap.sh", "berman_count_snps_v5.py" and
-"genome_vis.R". 
+"scripts/genome_vis/".
 
 ## Publicly available data
 ### Sequencing data
@@ -76,7 +73,7 @@ Joint genotyping is recommended for variant calling of multiple samples (i.e.,
 not combining VCF files of samples that were called separately). To facilitate 
 variant calling of publicly available sequencing data in addition to our study 
 isolates, we used GATK's HaplotypeCaller workflow (see 
-"scripts/haplotype_caller_scripts"). Variants were called for all isolates with 
+"scripts/haplotype_caller_scripts/"). Variants were called for all isolates with 
 GATK v4.1.2. A GenomicsDB object was created and VCF data from all isolates was 
 imported. Joint genotyping and filtering was performed following recommendations
 from GATK. Subsequent isolates were added to the GenomicsDB object and joint
