@@ -1,7 +1,6 @@
 ## Purpose: Calculate genome heterozygosity % and plot distribution
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-options(scipen = 999)
 
 ## Get phenotyping data----
 # *C. albicans* specific data from candidemia phenotyping manuscript
@@ -12,16 +11,13 @@ sample_naming <- sample_info %>%
   select(primary_id, join_id)
 
 ## Load packages----
-library(readxl)
-library(tidyverse)
-library(writexl)
 library(correlation)
 library(patchwork)
 
 ## Variables----
-spreadsheet_list <- "~/umn/data/metadata/Calbicans_snp_depth_paths.txt"
+spreadsheet_list <- "~/umn/data/metadata/2024_Calbicans_snp_depth_paths.txt"
 in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
-ordered_patient_data <-  "~/umn/data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
+ordered_patient_data <-  "~/umn/data/metadata/2025_Calbicans_MEC_ropars_hirakawa_raxml_midpoint_tips.txt"
 chr_size <- "scripts/figures/data/Calbicans_chr_lengths.csv"
 save_dir <- "~/umn/images/Calbicans/"
 genome_size <- 14324315
@@ -31,7 +27,10 @@ color_file <- read.table("scripts/figures/data/clade_colors.txt")
 pop_data <- read_excel(in_patient_data)
 pop_data[pop_data=="NA"] <- NA
 
-pt_order <- read.csv(ordered_patient_data, header = TRUE)
+pt_order <- read.csv(ordered_patient_data, header = FALSE, col.names = "sample")
+pt_order <- pt_order %>% 
+  filter(str_detect(sample, "^AMS|MEC")) %>% 
+  mutate(sample = replace(sample, sample=="MEC103", "MEC103-2"))
 pt_order <- pt_order %>%
   left_join(pop_data %>% filter(study=="MEC") %>% select(sample, mec_pt_code, mec_isolate_code))
 
@@ -51,7 +50,7 @@ genome_snp <- read_xlsx(snp_files[1]) %>%
   select(index, pos, snp_count)
 names(genome_snp)[names(genome_snp)=="snp_count"] <-str_extract(snp_files[1], "AMS[:digit:]+|MEC[:digit:]+")
 
-for(i in 2:100){
+for(i in 2:length(snp_files)){
   new_snp <- read_xlsx(snp_files[i]) %>%
     select(index, pos, snp_count)
   names(new_snp)[names(new_snp)=="snp_count"] <-str_extract(snp_files[i], "AMS[:digit:]+|MEC[:digit:]+")
@@ -74,27 +73,19 @@ snp_total <- snp_again %>%
 snp_total <- snp_total %>% 
   left_join(pt_order)%>% 
   left_join(sample_naming, by = c("sample" = "join_id")) %>% 
-  mutate(ploidy = case_when(sample == "MEC324" ~ 3,
-                            sample == "MEC185" ~ 4,
-                            sample %in% c("MEC279", "MEC293", "MEC135", "MEC319", "MEC322") ~ 5,
-                            sample %in% c("MEC218", "MEC219", "MEC352", "MEC246", "MEC172", 
-                                          "MEC198", "MEC199", "MEC200", "MEC201", "MEC297",
-                                          "MEC174") ~ 6,
-                            .default = 2))
+  left_join(pop_data %>% select(sample, ploidy))
+
+snp_total <- snp_total %>%
+  mutate(outlier = ifelse(sample %in% c("AMS5232", "MEC352"), mec_pt_code, NA))
+
 
 chr_total <- snp_again %>% 
   group_by(sample, index) %>% 
   summarise(chr_snps = sum(snp_count, na.rm = TRUE)) %>% 
   mutate(chr_het_percent = chr_snps/chrs$length * 100) %>% 
   left_join(pt_order) %>% 
-  left_join(sample_naming, by = c("sample" = "join_id"))%>% 
-  mutate(ploidy = case_when(sample == "MEC324" ~ 3,
-                            sample == "MEC185" ~ 4,
-                            sample %in% c("MEC279", "MEC293", "MEC135", "MEC319", "MEC322") ~ 5,
-                            sample %in% c("MEC218", "MEC219", "MEC352", "MEC246", "MEC172", 
-                                          "MEC198", "MEC199", "MEC200", "MEC201", "MEC297",
-                                          "MEC174") ~ 6,
-                            .default = 2))
+  left_join(sample_naming, by = c("sample" = "join_id")) %>% 
+  left_join(pop_data %>% select(sample, ploidy))
 
 chr_summary <- chr_total %>% group_by(index) %>% 
   summarise(min_het = min(chr_het_percent), max_het = max(chr_het_percent),
@@ -102,22 +93,24 @@ chr_summary <- chr_total %>% group_by(index) %>%
 
 ## Correlation tests----
 # overall heterozygosity, growth rate, carrying capacity
-genome_het_gc_corr <- snp_total %>% 
-  filter(ploidy==2) %>% 
-  left_join(gc, by = "primary_id") %>% 
-  select(het_percentage, k, r) %>% 
+genome_het_gc <- snp_total %>% 
+  left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
+  select(primary_id, het_percentage, k, r, ploidy) 
+
+genome_het_gc_corr <- genome_het_gc %>%
+  filter(is.na(ploidy)) %>% 
   correlation()
 
 # overall heterozygosity, SMG
 genome_het_smg <- snp_total %>% 
-  filter(ploidy==2) %>% 
+  filter(is.na(ploidy)) %>% 
   left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   select(het_percentage, mean_smg) %>% 
   correlation()
 
 # Per chrom heterozygosity, growth rate, carrying capacity
 chr_het_gc_corr <- chr_total %>% 
-  filter(ploidy==2) %>% 
+  filter(is.na(ploidy)) %>% 
   left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   group_by(index) %>% 
   select(chr_het_percent, k, r) %>% 
@@ -125,51 +118,121 @@ chr_het_gc_corr <- chr_total %>%
 
 # Per chrom heterozygosity, SMG
 chr_het_smg <- chr_total %>% 
-  filter(ploidy==2) %>% 
+  filter(is.na(ploidy)) %>% 
   left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   group_by(index) %>% 
   select(chr_het_percent, mean_smg) %>% 
   correlation()
 
 ## Plots----
+# Overall heterozygosity
 het_all <- ggplot(snp_total, aes(het_percentage)) +
-  geom_histogram(color = "grey50", fill = "grey65", binwidth = 0.0105) +
-  scale_x_continuous(limits = c(0.0,0.7)) +
+  geom_histogram(color = "grey50", fill = "grey65", bins = 40) +
+  scale_x_continuous(limits = c(0.0,0.8)) +
   theme_bw() +
   theme(axis.text = element_text(color = "black"),
         axis.title = element_text(color = "black")) +
   xlab("Genome heterozygosity, %") +
-  ylab("Count of isolates")
+  ylab("Isolates, N")
 
-ggsave(paste0(save_dir,Sys.Date(),"_Calbicans_MEC_genome_het.pdf"),
+ggsave(paste0(save_dir,format(Sys.Date(), "%Y"),"_Calbicans_MEC_genome_het.pdf"),
        het_all,
        width = 6,
        height = 4.5,
        units = "in")
 
+# Faceted chr heterozygosity
 het_chr_facet <- chr_total %>% 
   ggplot(aes(chr_het_percent)) +
-  geom_histogram(color = "grey50", fill = "grey65", binwidth = 0.01) +
-  facet_wrap(~index, nrow = 2, labeller = chr_labels) +
-  scale_x_continuous(limits = c(0.0,0.8)) +
+  geom_histogram(color = "grey50", fill = "grey65", bins = 40) +
+  facet_wrap(~index, nrow = 1, labeller = chr_labels) +
+  scale_x_continuous(limits = c(0, 0.8), breaks = c(0.2, 0.4, 0.6)) +
   theme_bw() +
   theme(axis.text = element_text(color = "black", size = 7),
-        axis.title = element_text(color = "black"),
+        axis.title = element_text(color = "black", size = 8),
         ) +
-  xlab("Chromosome heterozygosity, %") +
-  ylab("Count of isolates")
+  #xlab(NULL) +
+  ylab(NULL) +
+  xlab("Chromosome heterozygosity")
+  #ylab("Isolates, N") 
 
-ggsave(paste0(save_dir,Sys.Date(),"_Calbicans_MEC_chr_het.pdf"),
+ggsave(paste0(save_dir,format(Sys.Date(),"%Y"),"_Calbicans_MEC_chr_het.pdf"),
        het_chr_facet,
        width = 6,
-       height = 4.7,
+       height = 4.5,
        units = "in")
 
+# Stacked plots
 gen_chr_het <- (het_all+ theme(plot.margin = margin(b=12)))/
   het_chr_facet + plot_annotation(tag_levels = "A")
 
-ggsave(paste0(save_dir,Sys.Date(),"_Calbicans_MEC_combined_hets.pdf"),
+ggsave(paste0(save_dir,format(Sys.Date(), "%Y"),"_Calbicans_MEC_combined_hets.pdf"),
        gen_chr_het,
        width = 6,
        height = 6.2,
+       units = "in")
+
+# Scatter of phenotypes and heterozygosity
+r_genome_het_scatter <- snp_total %>% 
+  left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
+  #filter(is.na(ploidy)) %>% 
+  ggplot(aes(y = r, x = het_percentage)) + 
+  geom_point() +
+  #geom_text(aes(label = outlier), size = 4) +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,0.8)) +
+  theme(axis.text = element_text(color = "black", size = 7),
+        axis.title = element_text(color = "black"),
+  ) +
+  xlab("Genome heterozygosity, %") +
+  ylab("Growth rate (r)")
+
+k_chr_het_scatter <- chr_total %>% 
+  left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
+  filter(is.na(ploidy)) %>% 
+  ggplot(aes(x = k, y = chr_het_percent)) + 
+  geom_point() +
+  facet_wrap(~index, nrow = 2, labeller = chr_labels) +
+  theme_bw() +
+  theme(axis.text = element_text(color = "black", size = 7),
+        axis.title = element_text(color = "black"),
+  ) +
+  xlab("Chromosome heterozygosity, %") +
+  ylab("Carrying capacity (k)")
+
+smg_chr_het_scatter <- chr_total %>% 
+  left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
+  filter(is.na(ploidy)) %>% 
+  ggplot(aes(y = mean_smg, x = chr_het_percent)) + 
+  geom_point(size = 0.5, alpha = 0.8) +
+  #scale_x_continuous(limits = c(0, 0.5), breaks = c(0.2, 0.4)) +
+  facet_wrap(~index, nrow = 1, labeller = chr_labels) +
+  theme_bw() +
+  theme(axis.text = element_text(color = "black", size = 7),
+        axis.title = element_text(color = "black", size = 8),
+        #strip.background = element_blank(),
+        #strip.text = element_blank()
+  ) +
+  #xlab("Chromosome heterozygosity") +
+  xlab(NULL) +
+  ylab(NULL) 
+  #ylab("Mean supra-MIC growth")
+
+
+ggsave(paste0(save_dir,format(Sys.Date(),"%Y"),"_Calbicans_MEC_smg_vs_het_scatter.pdf"),
+       smg_chr_het_scatter,
+       width = 6,
+       height = 4.5,
+       units = "in")
+
+# composite with LOH heatmap from separate script
+# read in heatmap plot if needed or else run script to get p 
+p/smg_chr_het_scatter/het_chr_facet + plot_layout(heights = c(4,1,1))
+ggsave("2025_LOH_smg_scatter_chr_het.pdf", height = 9.5, width = 8, units = "in")
+
+# composite of LOH heatmap, genome het and growth rate scatter
+het_all + r_genome_het_scatter
+ggsave(paste0(save_dir, format(Sys.Date(), "%Y"), "_Calbicans_MEC_genome_het_histo_scatter.pdf"),
+       width = 7,
+       height = 3,
        units = "in")

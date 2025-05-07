@@ -1,12 +1,11 @@
 ## Purpose: Summary clinical and phenotypic data 
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
-options(scipen = 999)
 
-## Load packages----
-library(tidyverse)
-library(readxl)
-library(writexl)
+## Get cleaned and processed data from REDCap----
+# Use script from candidemia phenotyping manuscript for function, sample IDs and MICs
+
+source("~/umn/Candida_clinical_isolate_data/redcap_reports/MIC_data_summary.R")
 
 ## Variables----
 
@@ -14,7 +13,7 @@ library(writexl)
 growth_curves <- "58045"
 
 # Local antifungal data
-af_spreadsheet <- "~/umn/data/metadata/MEC_all_isolates_antifungal_history.xlsx"
+af_spreadsheet <- "~/umn/data/metadata/2024_MEC_antifungal_history.xlsx"
 
 # Isolates of interest from manual review of CHEF and CNV data
 interesting_isolates <- c("MEC352", "MEC079", "MEC218", "MEC219", "MEC279", "MEC293", 
@@ -22,11 +21,6 @@ interesting_isolates <- c("MEC352", "MEC079", "MEC218", "MEC219", "MEC279", "MEC
                           "MEC131", "MEC324", "MEC246", "MEC172", "MEC257", "MEC195",
                           "MEC085", "MEC080", "MEC268", "MEC247", "MEC198", "MEC297",
                           "MEC174")
-
-## Get cleaned and processed data from REDCap----
-# Use script from candidemia phenotyping manuscript for function, sample IDs and MICs
-
-source("~/umn/Candida_clinical_isolate_data/redcap_reports/MIC_data_summary.R")
 
 # Subset to species of interest
 mic_info <- mic_info %>% 

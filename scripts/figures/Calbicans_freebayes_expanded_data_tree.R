@@ -17,9 +17,9 @@ library(castor)
 ## Variables----
 species <- "Calbicans"
 
-raxml_file <- "/home/selmecki/scot0854/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_310"
+raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_299"
 
-metadata_file <- "/home/selmecki/scot0854/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
+metadata_file <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 
 # Clade colors
 color_file <- read.table("scripts/figures/data/clade_colors.txt")
@@ -46,10 +46,10 @@ longest_dist <- castor::find_farthest_tip_pair(Candida_raxml_midpoint)
 Candida_clades <- as_tibble(Candida_raxml_midpoint) %>% 
   mutate(rel_branch = branch.length/longest_dist$distance) %>% # normalize branch length to longest pairwise dist.
   filter(rel_branch > 0.05) %>% # set a minimum distance
-  filter(!node %in% parent, !grepl("^[[:alpha:]]", label)) #%>% # keep only inner nodes
-  #rename(clade_node = node) %>% 
- # mutate(Clade = c("1", "9", "7", "8A", "11", "8B", "8*", "4*", "4", "13", "D", "16",
-    #               "18", "3", "10", "B", "2", "12", "E", "6"))
+  filter(!node %in% parent, !grepl("^[[:alpha:]]", label)) %>% # keep only inner nodes
+  rename(clade_node = node) %>% 
+  mutate(Clade = c("1", "9", "7", "8A", "11", "8B", "8*", "4*", "4", "13", "D", "16",
+                   "18", "3", "10", "B", "2", "12", "E", "6"))
 
 ## Tree object combining phylo and metadata----
 Candida_tree <- Candida_raxml_midpoint %>% full_join(Candida_metadata, by = "label")
@@ -84,14 +84,14 @@ midpoint_plot <- ggtree(Candida_tree,
   scale_fill_manual(values = clade_colors, 
                     guide = "none") + 
   geom_treescale(x=0, 
-                 y=-0.3) #+
-  #geom_cladelab(data = Candida_clades, 
-  #              mapping = aes(node = clade_node, label = Clade),
-  #              align = TRUE,
+                 y=-0.3) +
+  geom_cladelab(data = Candida_clades, 
+                mapping = aes(node = clade_node, label = Clade),
+                align = TRUE,
                 #offset = 0.001,
-  #              fontsize = 3
-  #              ) +
-  #geom_hilight(data = Candida_clades, aes(node = clade_node, fill = Clade)) 
+                fontsize = 3
+               ) +
+  geom_hilight(data = Candida_clades, aes(node = clade_node, fill = Clade)) 
 
 ## Save tree----
 ggsave(paste0(Sys.Date(),"_",species,"_midpoint_expanded.pdf"),

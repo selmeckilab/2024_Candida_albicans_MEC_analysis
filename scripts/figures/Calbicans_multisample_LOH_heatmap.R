@@ -10,12 +10,15 @@ library(paletteer)
 library(writexl)
 
 ## Variables----
-spreadsheet_list <- "~/umn/data/metadata/Calbicans_snp_depth_paths.txt"
-ordered_patient_data <- "~/umn/data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
+spreadsheet_list <- "~/umn/data/metadata/2024_Calbicans_snp_depth_paths.txt"
+ordered_patient_data <- "~/umn/data/metadata/2024_Calbicans_MEC_raxml_midpoint_tips.csv"
 in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 save_dir <- "~/umn/images/Calbicans/"
 
 binned_color_scale <- c("white", paletteer_c("grDevices::Turku", 30))
+
+# Manually determined cen positions
+cens <- c(314, 1024, 1251, 1644, 1860, 2202, 2298, 2751)
 
 ## Read in SNP counts for all samples----
 snp_files <- scan(spreadsheet_list, what=character())
@@ -24,7 +27,7 @@ genome_snp <- read_xlsx(snp_files[1]) %>%
   select(index, pos, snp_count)
 names(genome_snp)[names(genome_snp)=="snp_count"] <-str_extract(snp_files[1], "AMS[:digit:]+|MEC[:digit:]+")
 
-for(i in 2:101){
+for(i in 2:length(snp_files)){
   new_snp <- read_xlsx(snp_files[i]) %>%
     select(index, pos, snp_count)
   names(new_snp)[names(new_snp)=="snp_count"] <-str_extract(snp_files[i], "AMS[:digit:]+|MEC[:digit:]+")
@@ -83,6 +86,7 @@ p <- snp_again %>%
                             fill=NA, inherit.aes=FALSE,colour = "grey26", linejoin = "round") +
   scale_x_continuous(expand = c(0,0),
                       breaks = chrs$tick,
+                     position = "top",
                       labels=c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5", "Chr6", "Chr7", "ChrR")) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
