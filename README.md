@@ -36,18 +36,6 @@ classification of fastq files using Centrifuge v1.0.4 (see
 analysis and updated in the study database if found to be a different species 
 (MEC008 removed, MEC005 added).
 
-## Variant calling, annotation, filtering
-Variants were called with freebayes v1.1.0, with parameters of -p 2 and -C 5,
-using each chromosome as a separate region (see "scripts/variants/array_alb_freebayes.sh").
-Chromosome concatenation, quality filtering and annotation were performed with
-BCFtools v1.17 and SnpEff v5.0e (see "scripts/variants/concat_filter_annotate.sh").
-
-## Clustering
-Variant sites with biallelic SNPs and no missing genotypes were used to
-generate a matrix for clustering ("concat_filter_annotate.sh"). Multiple
-correspondence analysis was performed using the FactoMiner package v2.9 (see
-"scripts/clustering/"). 
-
 ## Multilocus sequence typing
 "Consensus sequences" of the 7 MLST loci were generated for all 100 MEC isolates
 (see "scripts/mlst/"). The PubMLST database was queried via API to
@@ -59,6 +47,18 @@ an ID.
 A local version of YMAP's genome-wide LOH and CNV plotting was performed  using
 Deeptools for GC bias correction and samtools for depth and SNP calling. See
 "scripts/genome_vis/".
+
+## Variant calling, annotation, filtering
+Variants were called with freebayes v1.1.0, with parameters of -p 2 and -C 5,
+using each chromosome as a separate region (see "scripts/variants/array_alb_freebayes.sh").
+Chromosome concatenation, quality filtering and annotation were performed with
+BCFtools v1.17 and SnpEff v5.0e (see "scripts/variants/concat_filter_annotate.sh").
+
+## Clustering
+Variant sites with biallelic SNPs and no missing genotypes were used to
+generate a matrix for clustering ("concat_filter_annotate.sh"). Multiple
+correspondence analysis was performed using the FactoMiner package v2.9 (see
+"scripts/clustering/"). 
 
 ## Publicly available data
 ### Sequencing data
