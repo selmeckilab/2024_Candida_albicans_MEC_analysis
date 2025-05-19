@@ -108,12 +108,12 @@ genome_het_smg <- snp_total %>%
   select(het_percentage, mean_smg) %>% 
   correlation()
 
-# Per chrom heterozygosity, growth rate, carrying capacity
+# Per chrom heterozygosity, growth rate
 chr_het_gc_corr <- chr_total %>% 
   filter(is.na(ploidy)) %>% 
   left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   group_by(index) %>% 
-  select(chr_het_percent, k, r) %>% 
+  select(chr_het_percent, r) %>% 
   correlation()
 
 # Per chrom heterozygosity, SMG
@@ -202,24 +202,24 @@ k_chr_het_scatter <- chr_total %>%
 
 smg_chr_het_scatter <- chr_total %>% 
   left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
-  filter(is.na(ploidy)) %>% 
+  #filter(is.na(ploidy)) %>% 
+  filter(index == 4) %>% 
   ggplot(aes(y = mean_smg, x = chr_het_percent)) + 
-  geom_point(size = 0.5, alpha = 0.8) +
-  #scale_x_continuous(limits = c(0, 0.5), breaks = c(0.2, 0.4)) +
-  facet_wrap(~index, nrow = 1, labeller = chr_labels) +
+  geom_point(alpha = 0.5) +
+  #facet_wrap(~index, nrow = 2, labeller = chr_labels) +
   theme_bw() +
-  theme(axis.text = element_text(color = "black", size = 7),
-        axis.title = element_text(color = "black", size = 8),
+  theme(axis.text = element_text(color = "black", size = 9),
+        axis.title = element_text(color = "black", size = 10),
         #strip.background = element_blank(),
         #strip.text = element_blank()
   ) +
-  #xlab("Chromosome heterozygosity") +
-  xlab(NULL) +
-  ylab(NULL) 
-  #ylab("Mean supra-MIC growth")
+  xlab("Chr4 heterozygosity, %") +
+  #xlab(NULL) +
+  #ylab(NULL) 
+  ylab("Mean supra-MIC growth")
 
 
-ggsave(paste0(save_dir,format(Sys.Date(),"%Y"),"_Calbicans_MEC_smg_vs_het_scatter.pdf"),
+ggsave(paste0(save_dir,format(Sys.Date(),"%Y"),"_Calbicans_MEC_smg_vs_Chr4_het.tiff"),
        smg_chr_het_scatter,
        width = 6,
        height = 4.5,
