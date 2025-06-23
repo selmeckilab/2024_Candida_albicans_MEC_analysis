@@ -13,12 +13,12 @@ library(patchwork)
 
 ## Variables--
 species <- "C. albicans"
-in_variant_file <- "~/umn/data/variants/Calbicans/Calbicans_MEC_bwa_filtered_annotated.vcf.gz"
-in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
-ordered_patient_data <-  "~/umn/data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
-save_dir <- "~/umn/images/Calbicans/"
+in_variant_file <- "data/variants/Calbicans/Calbicans_MEC_bwa_filtered_annotated.vcf.gz"
+in_patient_data <- "data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
+ordered_patient_data <-  "data/metadata/Calbicans_MEC_raxml_midpoint_tips.csv"
+save_dir <- "images/Calbicans/"
 species_ploidy <- 2
-color_file <- read.table("ch3/clade_colors.txt")
+color_file <- read.table("scripts/figures/plotting_data/clade_colors.txt")
 
 # Clade colors
 clade_colors <- color_file[,2]

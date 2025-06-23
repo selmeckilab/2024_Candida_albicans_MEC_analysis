@@ -8,10 +8,10 @@ library(RcppRoll)
 library(tidyverse)
 
 # Variables----
-read_depth_file <- "~/umn/data/genome_plots/Calbicans/500bp/2024-03-27_MEC172.xlsx"
+read_depth_file <- "data/genome_plots/Calbicans/500bp/2024-03-27_MEC172.xlsx"
 sample_id <- "Isolate_72"
-feature_file <- "scripts/figures/data/Calbicans_SC5314_A21_plotting_features.txt"
-label_file <- "scripts/figures/data/Calbicans_SC5314_A21_chr_labels.txt"
+feature_file <- "scripts/figures/plotting_data/Calbicans_SC5314_A21_plotting_features.txt"
+label_file <- "scripts/figures/plotting_data/Calbicans_SC5314_A21_chr_labels.txt"
 
 window <- 500 # size of window used for rolling mean and snp density
 ploidy <- 2

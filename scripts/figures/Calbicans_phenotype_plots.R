@@ -10,7 +10,6 @@ library(ggbeeswarm)
 ## Get phenotyping data----
 source("scripts/figures/Calbicans_redcap_summary.R")
 
-
 calbicans_isolates <- sample_info %>% 
   filter(genus_species=="C. albicans") %>%
   select(primary_id, genus_species)
@@ -92,15 +91,3 @@ amb <- ggplot(mic_info %>% filter(genus_species == "C. albicans", drug=="amphote
 
 flc + mcf + amb
 ggsave("Calbicans_MEC_MICs.png", bg="white", width = 11, height = 4, units = "in", dpi=300)
-
-#flc_smg <- ggplot(mic_info %>% filter(genus_species == "C. albicans", drug=="fluconazole"), 
-#                  aes(x = genus_species, y = mean_smg)) +
-#  geom_pointrange(aes(ymax=(mean_smg + sd_smg), 
-#                      ymin=(mean_smg - sd_smg)), 
-#                  position = position_jitter(width = 0.5, height = 0.1, seed = 123),
-#                  alpha=0.6, 
-#                  show.legend = FALSE) +
-#  ylab("Mean supra-MIC growth") +
-#  theme_bw() +
-#  theme(axis.title.x = element_blank(),
-#        axis.text.x = element_blank())

@@ -15,13 +15,13 @@ library(correlation)
 library(patchwork)
 
 ## Variables----
-spreadsheet_list <- "~/umn/data/metadata/2024_Calbicans_snp_depth_paths.txt"
-in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
-ordered_patient_data <-  "~/umn/data/metadata/2025_Calbicans_MEC_ropars_hirakawa_raxml_midpoint_tips.txt"
-chr_size <- "scripts/figures/data/Calbicans_chr_lengths.csv"
-save_dir <- "~/umn/images/Calbicans/"
+spreadsheet_list <- "data/metadata/2024_Calbicans_snp_depth_paths.txt"
+in_patient_data <- "data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
+ordered_patient_data <-  "data/metadata/2025_Calbicans_MEC_ropars_hirakawa_raxml_midpoint_tips.txt"
+chr_size <- "scripts/figures/plotting_data/Calbicans_chr_lengths.csv"
+save_dir <- "images/Calbicans/"
 genome_size <- 14324315
-color_file <- read.table("scripts/figures/data/clade_colors.txt")
+color_file <- read.table("scripts/figures/plotting_data/clade_colors.txt")
 
 # Metadata
 pop_data <- read_excel(in_patient_data)
@@ -98,12 +98,12 @@ genome_het_gc <- snp_total %>%
   select(primary_id, het_percentage, k, r, ploidy) 
 
 genome_het_gc_corr <- genome_het_gc %>%
-  filter(is.na(ploidy)) %>% 
+  #filter(is.na(ploidy)) %>% 
   correlation()
 
 # overall heterozygosity, SMG
 genome_het_smg <- snp_total %>% 
-  filter(is.na(ploidy)) %>% 
+  #filter(is.na(ploidy)) %>% 
   left_join(mic_info %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   select(het_percentage, mean_smg) %>% 
   correlation()
@@ -176,8 +176,9 @@ ggsave(paste0(save_dir,format(Sys.Date(), "%Y"),"_Calbicans_MEC_combined_hets.pd
 r_genome_het_scatter <- snp_total %>% 
   left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
   #filter(is.na(ploidy)) %>% 
-  ggplot(aes(y = r, x = het_percentage)) + 
+  ggplot(aes(y = r, x = het_percentage, color = ploidy)) + 
   geom_point() +
+  scale_color_manual(values = c("#0072B2", "#0072B2", "#F0E442", "#D55E00", "#57606C")) +
   #geom_text(aes(label = outlier), size = 4) +
   theme_bw() +
   scale_x_continuous(limits = c(0,0.8)) +
@@ -185,7 +186,7 @@ r_genome_het_scatter <- snp_total %>%
         axis.title = element_text(color = "black"),
   ) +
   xlab("Genome heterozygosity, %") +
-  ylab("Growth rate (r)")
+  ylab("Growth rate (hour-1)")
 
 k_chr_het_scatter <- chr_total %>% 
   left_join(gc %>% filter(drug=="fluconazole"), by = "primary_id") %>% 
@@ -205,24 +206,26 @@ smg_chr_het_scatter <- chr_total %>%
   #filter(is.na(ploidy)) %>% 
   filter(index == 4) %>% 
   ggplot(aes(y = mean_smg, x = chr_het_percent)) + 
-  geom_point(alpha = 0.5) +
-  #facet_wrap(~index, nrow = 2, labeller = chr_labels) +
+  geom_point(alpha = 0.5, size = 2) +
   theme_bw() +
   theme(axis.text = element_text(color = "black", size = 9),
         axis.title = element_text(color = "black", size = 10),
         #strip.background = element_blank(),
         #strip.text = element_blank()
   ) +
-  xlab("Chr4 heterozygosity, %") +
-  #xlab(NULL) +
-  #ylab(NULL) 
-  ylab("Mean supra-MIC growth")
+  scale_x_continuous(limits = c(0.0,0.8))+
+  scale_y_continuous(limits = c(0.0, 0.8))+
+  #xlab("Chr4 heterozygosity, %") +
+  #ylab("Mean supra-MIC growth") +
+  xlab(NULL)+
+  ylab(NULL)+
+  annotate("point", x = 0.71, y = 0.556, color="#931A1D", size = 2.5) +
+  annotate("text", x = 0.73, y = 0.61, label = "120")
 
-
-ggsave(paste0(save_dir,format(Sys.Date(),"%Y"),"_Calbicans_MEC_smg_vs_Chr4_het.tiff"),
+ggsave(paste0(save_dir,format(Sys.Date(),"%Y"),"_Calbicans_MEC_smg_vs_Chr4_het.pdf"),
        smg_chr_het_scatter,
-       width = 6,
-       height = 4.5,
+       width = 4,
+       height = 3.5,
        units = "in")
 
 # composite with LOH heatmap from separate script
@@ -233,6 +236,6 @@ ggsave("2025_LOH_smg_scatter_chr_het.pdf", height = 9.5, width = 8, units = "in"
 # composite of LOH heatmap, genome het and growth rate scatter
 het_all + r_genome_het_scatter
 ggsave(paste0(save_dir, format(Sys.Date(), "%Y"), "_Calbicans_MEC_genome_het_histo_scatter.pdf"),
-       width = 7,
+       width = 8,
        height = 3,
        units = "in")

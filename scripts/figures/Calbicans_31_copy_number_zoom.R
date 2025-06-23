@@ -8,23 +8,23 @@ library(RcppRoll)
 library(tidyverse)
 
 # Variables----
-read_depth_file <- "data/genome_plots/Calbicans/500bp/2024-03-27_MEC297.xlsx"
-sample_id <- "Isolate 98"
+read_depth_file <- "data/genome_plots/Calbicans/500bp/2024-03-27_MEC216.xlsx"
+sample_id <- "Isolate_31_1"
 feature_file <- "scripts/figures/plotting_data/Calbicans_SC5314_A21_plotting_features.txt"
 label_file <- "scripts/figures/plotting_data/Calbicans_SC5314_A21_chr_labels.txt"
 
 window <- 500 # size of window used for rolling mean and snp density
 ploidy <- 2
-chrom_of_interest <- 5
+chrom_of_interest <- 7
 y_max_limit <- 5
-region_start <- 245000
-region_stop <- 760000
-x_breaks <- c(250000, 500000, 750000)
-x_labels <- c("0.25", "0.5", "0.75")
-bp1_start <- 420489
-bp1_stop <- 420495
-bp2_start <- 471762
-bp2_stop <- 473964
+region_start <- 450000 
+region_stop <- 950000
+x_breaks <- c(450000, 610000, 780000, 940000)
+x_labels <- c("0.45", "0.61", "0.78", "0.94")
+bp1_start <- 762338
+bp1_stop <- 765910
+bp2_start <- 817612
+bp2_stop <- 821184
 
 feature_colors <- c("#0072B2", "#56B4E9")
 repeat_color <- "#D55E00"
@@ -32,7 +32,6 @@ feature_shapes <- c(23,21)
 feature_sizes <- c(3, 2)
 
 save_dir <- "" # path with trailing slash, or  "" to save locally
-ref <- "SC5314" # short label for file name or "" to leave out
 
 # X-axis labels overwrite input scaffold names in final plot
 chr_ids <- scan(label_file, what = character())
@@ -79,17 +78,7 @@ region_depth <- genome_depth %>%
            ymax = 5,
            alpha = 0.5,
            color = repeat_color,
-           fill = repeat_color) +
-  geom_point(data = chr_feature, 
-             aes(x = start, 
-                 y = 0, 
-                 shape = Feature,
-                 fill = Feature,
-                 size = Feature)) +
-  scale_shape_manual(values = feature_shapes) +
-  scale_fill_manual(values = feature_colors) +
-  scale_size_manual(values = feature_sizes) +
-  theme(legend.position = "none")
+           fill = repeat_color) 
 
 ggsave(paste0(sample_id, "_zoom_copy_number.pdf"),
        region_depth,

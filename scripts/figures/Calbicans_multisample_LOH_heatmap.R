@@ -5,15 +5,14 @@
 ## Load packages----
 library(readxl)
 library(tidyverse)
-library(ggplot2)
 library(paletteer)
 library(writexl)
 
 ## Variables----
-spreadsheet_list <- "~/umn/data/metadata/2024_Calbicans_snp_depth_paths.txt"
-ordered_patient_data <- "~/umn/data/metadata/2024_Calbicans_MEC_raxml_midpoint_tips.csv"
-in_patient_data <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
-save_dir <- "~/umn/images/Calbicans/"
+spreadsheet_list <- "data/metadata/2024_Calbicans_snp_depth_paths.txt"
+ordered_patient_data <- "data/metadata/2025_Calbicans_midpoint_gatk_302.csv"
+in_patient_data <- "data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
+save_dir <- "images/Calbicans/"
 
 binned_color_scale <- c("white", paletteer_c("grDevices::Turku", 30))
 
@@ -62,7 +61,9 @@ pop.data[pop.data=="NA"] <- NA
 
 pt_order <- read.csv(ordered_patient_data, header = TRUE)
 pt_order <- pt_order %>%
-  left_join(pop.data %>% filter(study=="MEC") %>% select(sample, mec_pt_code, mec_isolate_code))
+  right_join(pop.data %>%
+               filter(study=="MEC", sample !="AMS6466") %>%
+               select(sample, mec_pt_code, mec_isolate_code))
 
 ## Plot with manually annotated clade breaks----
 p <- snp_again %>%

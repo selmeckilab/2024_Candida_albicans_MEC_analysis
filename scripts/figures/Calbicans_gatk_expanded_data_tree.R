@@ -17,12 +17,12 @@ library(castor)
 ## Variables----
 species <- "Calbicans"
 sample_number <- 302
-raxml_file <- "~/umn/data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_302"
+raxml_file <- "data/phylogeny/Calbicans/RAxML_bipartitions.Calbicans_302"
 
-metadata_file <- "~/umn/data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
+metadata_file <- "data/metadata/2024_Calbicans_sorted_patient_info.xlsx"
 
 # Clade colors
-color_file <- read.table("scripts/figures/data/clade_colors.txt")
+color_file <- read.table("scripts/figures/plotting_data/clade_colors.txt")
 clade_colors <- color_file[,2]
 names(clade_colors) <- color_file[,1]
 

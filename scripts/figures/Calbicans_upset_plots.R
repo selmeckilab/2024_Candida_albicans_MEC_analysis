@@ -6,7 +6,7 @@
 library(UpSetR)
 library(tidyverse)
 
-in_file <- "~/umn/data/variants/Calbicans/manual_review/manual_N_unfixed.txt"
+in_file <- "data/variants/Calbicans/manual_review/manual_N_unfixed.txt"
 all_snps <- read.delim(in_file,
                  header = T)
 #samples <- c("52-1", "52-2", "52-5", "52-3", "52-4")

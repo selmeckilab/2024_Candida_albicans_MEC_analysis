@@ -1,4 +1,4 @@
-## Purpose: Replot genome-view of LOH and CNV from saved summary data
+## Purpose: Replot LOHfrom saved summary data
 ## Author: Nancy Scott
 ## Email: scot0854@umn.edu
 
@@ -8,26 +8,23 @@ library(RcppRoll)
 library(tidyverse)
 
 # Variables----
-read_depth_file <- "~/umn/data/genome_plots/Calbicans/500bp/2024-03-27_MEC297.xlsx"
-sample_id <- "Isolate 98"
-feature_file <- "scripts/figures/data/Calbicans_SC5314_A21_plotting_features.txt"
-label_file <- "scripts/figures/data/Calbicans_SC5314_A21_chr_labels.txt"
+read_depth_file <- "data/genome_plots/Calbicans/2023-11-29_MEC318.xlsx"
+sample_id <- "Isolate 52-1"
+feature_file <- "scripts/figures/plotting_data/Calbicans_SC5314_A21_plotting_features.txt"
+label_file <- "scripts/figures/plotting_data/Calbicans_SC5314_A21_chr_labels.txt"
 
-window <- 500 # size of window used for rolling mean and snp density
+window <- 5000 # size of window used for rolling mean and snp density
 ploidy <- 2
 chrom_of_interest <- 5
 y_max_limit <- 5
-region_start <- 245000
+region_start <- 0
 region_stop <- 760000
-x_breaks <- c(250000, 500000, 750000)
-x_labels <- c("0.25", "0.5", "0.75")
-bp1_start <- 402489
-bp1_stop <- 420495
-bp2_start <- 471762
-bp2_stop <- 473964
+x_breaks <- c(0, 250000, 500000, 750000)
+x_labels <- c("0", "0.25", "0.5", "0.75")
 
+snp_low <- "white"
+snp_high <- "black"
 feature_colors <- c("#0072B2", "#56B4E9")
-repeat_color <- "#D55E00"
 feature_shapes <- c(23,21)
 feature_sizes <- c(3, 2)
 
@@ -50,36 +47,28 @@ chr_feature <- features %>%
   filter(index == chrom_of_interest, Feature %in% c("Centromere", "MTL"))
 
 # Plot region of interest----
-region_depth <- genome_depth %>%
+region_loh <- genome_depth %>%
   filter(index == chrom_of_interest,
          pos>= region_start,
          pos<= region_stop) %>%
-  ggplot(aes(x = pos, y=copy_number)) +
-  geom_point(alpha = 0.6, size=1) +
+  ggplot() +
+  geom_segment(aes(x = pos, 
+                   xend = pos, 
+                   y = 0, 
+                   yend = y_max_limit,
+                   color = snp_count)) +
   theme_minimal() +
   xlab(paste0("Chr",
               chrom_of_interest,
               " position (Mb)")) +
-  ylab("Relative copy number") +
+  ylab("Heterozygous SNP Density") +
   theme(axis.title = element_text(family = "Helvetica")) +
-  scale_y_continuous(limits = c(0, y_max_limit)) +
+  scale_color_gradient(low=snp_low,
+                       high=snp_high, 
+                       na.value = "white", 
+                       guide = "none") +
+  scale_y_continuous(limits = c(0, y_max_limit), breaks = NULL) +
   scale_x_continuous(breaks = x_breaks,labels = x_labels) +
-  annotate("rect", 
-           xmin = bp1_start,
-           xmax = bp1_stop, 
-           ymin = 0, 
-           ymax = 5,
-           alpha = 0.6,
-           color = repeat_color,
-           fill = repeat_color) +
-  annotate("rect",
-           xmin = bp2_start,
-           xmax = bp2_stop,
-           ymin = 0,
-           ymax = 5,
-           alpha = 0.5,
-           color = repeat_color,
-           fill = repeat_color) +
   geom_point(data = chr_feature, 
              aes(x = start, 
                  y = 0, 
@@ -91,10 +80,10 @@ region_depth <- genome_depth %>%
   scale_size_manual(values = feature_sizes) +
   theme(legend.position = "none")
 
-ggsave(paste0(sample_id, "_zoom_copy_number.pdf"),
-       region_depth,
+ggsave(paste0(sample_id, "_zoom_LOH.pdf"),
+       region_loh,
        device = pdf,
        width = 3.5,
-       height = 3.6,
+       height = 2.2,
        units = "in"
        )
