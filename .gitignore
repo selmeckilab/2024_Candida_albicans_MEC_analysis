@@ -12,3 +12,5 @@ renv/python/
 renv/sandbox/
 renv/staging/
 renv/.gitignore
+data
+images
