@@ -17,7 +17,8 @@ save_dir <- "images/Calbicans/"
 binned_color_scale <- c("white", paletteer_c("grDevices::Turku", 30))
 
 # Manually determined cen positions
-cens <- c(314, 1024, 1251, 1644, 1860, 2202, 2298, 2751)
+cens <- data.frame(x = c(314, 1024, 1251, 1644, 1860, 2202, 2298, 2751),
+                  y = rep(0.6,8), z = rep(102.5, 8))
 
 ## Read in SNP counts for all samples----
 snp_files <- scan(spreadsheet_list, what=character())
@@ -63,10 +64,12 @@ pt_order <- read.csv(ordered_patient_data, header = TRUE)
 pt_order <- pt_order %>%
   right_join(pop.data %>%
                filter(study=="MEC", sample !="AMS6466") %>%
-               select(sample, mec_pt_code, mec_isolate_code))
+               select(sample, mec_pt_code, mec_isolate_code)) %>% 
+  mutate(mec_isolate_code = replace(mec_isolate_code, mec_isolate_code=="SC5314-1", "SC5314"))
 
 ## Plot with manually annotated clade breaks----
 p <- snp_again %>%
+  filter(sample != "AMS6466") %>% 
   mutate(clustered_samples = fct_relevel(sample, rev(pt_order$sample))) %>%
   ggplot(aes(x=x_num, y=clustered_samples)) +
   geom_tile(aes(fill=snp_count, colour = snp_count), linewidth=0.27) +
@@ -79,12 +82,13 @@ p <- snp_again %>%
                     limits = c(0,300),
                     n.breaks = 31,
                     labels = c("0", rep("",9), "100", rep("", 9), "200", rep("", 9), "300"),
-                    colors = binned_color_scale,
-                    name = "Heterozygoups SNPs per 5kb") +
+                    colors = binned_color_scale) +
   scale_y_discrete(labels = rev(pt_order$mec_isolate_code)) +
   theme_minimal() +
   geom_rect(data=chrs, aes(group=index, xmin=border_start, xmax=border_stop, ymin=0.5, ymax=Inf),
                             fill=NA, inherit.aes=FALSE,colour = "grey26", linejoin = "round") +
+  geom_point(data = cens, aes(x =x, y = y), size = 2, shape = 23, fill = "black") +
+  geom_point(data = cens, aes(x = x, y = z), size = 2, shape = 23, fill = "black") +
   scale_x_continuous(expand = c(0,0),
                       breaks = chrs$tick,
                      position = "top",
@@ -93,23 +97,24 @@ p <- snp_again %>%
         axis.title.y = element_blank(),
         axis.text.y = element_text(size=5.4, color = "black"),
         axis.text.x = element_text(size = 8, color = "black"),
-        legend.position = "bottom", 
-        legend.title.position = "left",
-        legend.title = element_text(size = 8, color = "black"),
         plot.margin = margin(0,10.5,5.5,5.5,"pt"),
-        legend.text = element_text(angle = 90, size = 6, color = "black")) +
-  annotate("segment", x=0, xend = 2860, y= 19.5, yend = 19.5, linewidth = 0.2, colour = "grey39") +
+        legend.text = element_text(size = 5, color = "black"),
+        legend.position = "right", 
+        legend.box.margin = margin(0,0,0,0),
+        legend.margin = margin(0,0,0,0),
+        legend.justification = "bottom",
+        legend.key.size = unit(0.5, 'lines'),
+        legend.title = element_blank()) +
   annotate("segment", x=0, xend = 2860, y= 20.5, yend = 20.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 34.5, yend = 34.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 35.5, yend = 35.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 36.5, yend = 36.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 37.5, yend = 37.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 43.5, yend = 43.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 46.5, yend = 46.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 54.5, yend = 54.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 19.5, yend = 19.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 59.5, yend = 59.5, linewidth = 0.2, colour = "grey39") +
-  annotate("segment", x=0, xend = 2860, y= 63.5, yend = 63.5, linewidth = 0.2, colour = "grey39") 
+  annotate("segment", x=0, xend = 2860, y= 21.5, yend = 21.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 22.5, yend = 22.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 23.5, yend = 23.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 38.5, yend = 38.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 42.5, yend = 42.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 47.5, yend = 47.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 55.5, yend = 55.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 60.5, yend = 60.5, linewidth = 0.2, colour = "grey39") +
+  annotate("segment", x=0, xend = 2860, y= 64.5, yend = 64.5, linewidth = 0.2, colour = "grey39") 
 
 # Troubleshooting: what are the axis positions per sample?
 #details <- ggplot_build(p)
@@ -120,7 +125,7 @@ ggsave(paste0(save_dir,Sys.Date(),"_MEC_Calbicans_LOH_heatmap.pdf"),
        #device=png, 
        #dpi=300, 
        #bg="white",
-       width = 6, 
+       width = 6.8, 
        height = 6, 
        units="in")
 

@@ -1,7 +1,7 @@
 # *Candida albicans* MEC isolate analysis
 
 ## Study isolates
-There are 102 *C. albicans* MEC isolates analyzed for this project (see
+There are 101 *C. albicans* MEC isolates analyzed for this project (see
 "Calbicans_sequencing_paths.txt" for list of isolate IDs). All MEC isolates are
 single colony subcultures from blood cultures collected from UMMC and affiliated 
 hospitals. These were collected under IRB IDs STUDY00006473 and STUDY00021428.
